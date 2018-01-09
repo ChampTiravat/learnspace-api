@@ -10,13 +10,9 @@ import cors from "cors";
 import http from "http";
 import path from "path";
 
-// Initialize ENV configurations
-dotenv.config();
+import { DB_HOST, DB_PORT, DB_NAME } from "./config/database-config";
+import { APP_PORT } from "./config/application-config";
 
-const APP_PORT = 5000 || process.env.APP_PORT;
-const DB_HOST = process.env.DB_HOST;
-const DB_PORT = process.env.DB_PORT;
-const DB_NAME = process.env.DB_TEST_NAME || process.env.DB_DEV_NAME;
 const DB_DEV_CONNECTION_STRING = `mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`;
 
 // Initialize App
