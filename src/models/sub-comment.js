@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose'
 
-const ChatMessageSchema = new Schema({
+const SubCommentSchema = new Schema({
 	creator: {
 		type: Schema.Types.ObjectId,
 		ref: 'User',
@@ -11,11 +11,10 @@ const ChatMessageSchema = new Schema({
 		required: true,
 		trim: true
 	},
-	parentChatroom: {
+	parentComment: {
 		type: Schema.Types.ObjectId,
-		ref: 'Chatroom',
-		required: true
+		ref: 'Comment'
 	}
 })
 
-export default mongoose.model('chat_messages', ChatMessageSchema)
+export default mongoose.model('sub_comments', SubCommentSchema)

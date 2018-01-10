@@ -1,11 +1,17 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from 'mongoose'
 
-const ChatroomSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    isRequired: true,
-    unique: false
-  }
-});
+const ChatroomSchema = new Schema({
+	parentClassroom: {
+		type: Schema.Types.ObjectId,
+		ref: 'Classroom',
+		required: true
+	},
+	message: [
+		{
+			type: Schema.Types.ObjectId,
+			ref: 'ChatMessage'
+		}
+	]
+})
 
-export default mongoose.model("chatrooms", ChatroomSchema);
+export default mongoose.model('chatrooms', ChatroomSchema)
