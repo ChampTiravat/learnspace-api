@@ -10,7 +10,8 @@ export default `
 
   type LoginResponse {
     success: Boolean!
-    token: String
+    refreshToken: String
+    accessToken: String
     user: User
     err: String
   }
