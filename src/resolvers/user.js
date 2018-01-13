@@ -62,7 +62,6 @@ export default {
      * @desc Authenticate user by verifying their email nad password
      */
     login: async (parent, { email, password }, context) => {
-      console.log('Someone try to log in . . . ')
       try {
         const user = await User.findOne({ email })
 

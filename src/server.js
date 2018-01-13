@@ -10,6 +10,7 @@ import cors from 'cors'
 import http from 'http'
 import path from 'path'
 
+import initializeUserToContext from './middlewares/initializeUserToContext'
 import { APP_SERVING_PATH, APP_PORT } from './config/application-config'
 import { DB_CONNECTION_STRING } from './config/database-config'
 
@@ -17,10 +18,10 @@ import { DB_CONNECTION_STRING } from './config/database-config'
 const app = express()
 
 // Connecting to MongoDB
+mongoose.Promise = bluebird
 mongoose.connect(DB_CONNECTION_STRING, {
   useMongoClient: true
 })
-mongoose.Promise = bluebird
 
 // Middlewares
 app.use(cors('*'))
@@ -28,7 +29,6 @@ app.use(cors('*'))
 // Setup Schema
 const resolvers = mergeResolvers(fileLoader(path.join(__dirname, 'resolvers')))
 const typeDefs = mergeTypes(fileLoader(path.join(__dirname, 'schemas')))
-
 const schema = makeExecutableSchema({
   typeDefs,
   resolvers
@@ -38,14 +38,11 @@ const schema = makeExecutableSchema({
 app.use(
   '/graphql',
   bodyParser.json(),
-  (req, res, next) => {
-    console.log(req.headers.authorization)
-    return next()
-  },
+  initializeUserToContext,
   graphqlExpress(req => ({
     schema,
     debug: process.env.NODE_ENV === 'development' ? true : false,
-    context: { test: 'hello from context' }
+    context: { user: req.user }
   }))
 )
 
