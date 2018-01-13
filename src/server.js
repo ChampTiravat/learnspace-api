@@ -26,6 +26,7 @@ mongoose.connect(DB_CONNECTION_STRING, {
 
 // Middlewares
 app.use(cors('*'))
+app.use(extractUserFromToken)
 
 // Setup Schema
 const resolvers = mergeResolvers(fileLoader(path.join(__dirname, 'resolvers')))
@@ -39,7 +40,6 @@ const schema = makeExecutableSchema({
 app.use(
   '/graphql',
   bodyParser.json(),
-  extractUserFromToken,
   graphqlExpress(req => ({
     schema,
     debug: process.env.NODE_ENV === 'development' ? true : false,
@@ -56,6 +56,8 @@ app.use(
   })
 )
 
+// Startint the server
 http.createServer(app).listen(APP_PORT, err => {
+  if (err) throw err
   console.log(`Server started at ${APP_SERVING_PATH}`)
 })

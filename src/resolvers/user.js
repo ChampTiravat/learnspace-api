@@ -83,7 +83,7 @@ export default {
 
         if (isPasswordValid) {
           // Correct Password
-          const accessToken = jwt.sign(
+          const accessToken = await jwt.sign(
             { email: user.email },
             SECRET_TOKEN_KEY,
             {
@@ -91,7 +91,10 @@ export default {
             }
           )
 
-          const refreshToken = jwt.sign({ email: user.email }, SECRET_TOKEN_KEY)
+          const refreshToken = await jwt.sign(
+            { email: user.email },
+            SECRET_TOKEN_KEY
+          )
 
           return {
             success: true,
