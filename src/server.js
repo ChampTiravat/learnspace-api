@@ -10,9 +10,10 @@ import cors from 'cors'
 import http from 'http'
 import path from 'path'
 
-import initializeUserToContext from './middlewares/initializeUserToContext'
 import { APP_SERVING_PATH, APP_PORT } from './config/application-config'
 import { DB_CONNECTION_STRING } from './config/database-config'
+
+import extractUserFromToken from './middlewares/extractUserFromToken'
 
 // Initialize App
 const app = express()
@@ -38,7 +39,7 @@ const schema = makeExecutableSchema({
 app.use(
   '/graphql',
   bodyParser.json(),
-  initializeUserToContext,
+  extractUserFromToken,
   graphqlExpress(req => ({
     schema,
     debug: process.env.NODE_ENV === 'development' ? true : false,

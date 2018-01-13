@@ -3,11 +3,15 @@ import jwt from 'jsonwebtoken'
 import { SECRET_TOKEN_KEY } from '../config/security-config'
 
 /**
- * @name initializeUserToContext()
+ * @name extractUserFromToken()
  * @type Middleware
- * @desc
+ * @param req : HTTP Request
+ * @param res : HTTP Response
+ * @param next : Next Middleware
+ * @desc Extract user information from the given token(JSON) then attach it the HTTP Request Object.
+ *        So, Apollo GraphQLExpress() should add the exacted user to it's context
  */
-const initializeUserToContext = async (req, res, next) => {
+const extractUserFromToken = async (req, res, next) => {
   const token = await req.headers.authorization
 
   if (!token) {
@@ -31,4 +35,4 @@ const initializeUserToContext = async (req, res, next) => {
   return next()
 }
 
-export default initializeUserToContext
+export default extractUserFromToken
