@@ -10,20 +10,17 @@ import cors from 'cors'
 import http from 'http'
 import path from 'path'
 
-import { DB_HOST, DB_PORT, DB_NAME } from './config/database-config'
-import { APP_PORT } from './config/application-config'
-
-const DB_DEV_CONNECTION_STRING = `mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`
+import { APP_SERVING_PATH, APP_PORT } from './config/application-config'
+import { DB_CONNECTION_STRING } from './config/database-config'
 
 // Initialize App
 const app = express()
 
 // Connecting to MongoDB
-mongoose.connect(DB_DEV_CONNECTION_STRING, {
-	useMongoClient: true
+mongoose.connect(DB_CONNECTION_STRING, {
+  useMongoClient: true
 })
 mongoose.Promise = bluebird
-console.log(DB_DEV_CONNECTION_STRING)
 
 // Middlewares
 app.use(cors('*'))
@@ -33,30 +30,34 @@ const resolvers = mergeResolvers(fileLoader(path.join(__dirname, 'resolvers')))
 const typeDefs = mergeTypes(fileLoader(path.join(__dirname, 'schemas')))
 
 const schema = makeExecutableSchema({
-	typeDefs,
-	resolvers
+  typeDefs,
+  resolvers
 })
 
 // GraphQL Entry Point
 app.use(
-	'/graphql',
-	bodyParser.json(),
-	graphqlExpress(req => ({
-		schema,
-		debug: process.env.NODE_ENV === 'development' ? true : false,
-		context: { test: 'hello from context' }
-	}))
+  '/graphql',
+  bodyParser.json(),
+  (req, res, next) => {
+    console.log(req.headers.authorization)
+    return next()
+  },
+  graphqlExpress(req => ({
+    schema,
+    debug: process.env.NODE_ENV === 'development' ? true : false,
+    context: { test: 'hello from context' }
+  }))
 )
 
 // GraphiQL Entry Point
 app.use(
-	'/graphiql',
-	bodyParser.json(),
-	graphiqlExpress({
-		endpointURL: '/graphql'
-	})
+  '/graphiql',
+  bodyParser.json(),
+  graphiqlExpress({
+    endpointURL: '/graphql'
+  })
 )
 
 http.createServer(app).listen(APP_PORT, err => {
-	console.log(`Server started at http://localhost:${APP_PORT}`)
+  console.log(`Server started at ${APP_SERVING_PATH}`)
 })
