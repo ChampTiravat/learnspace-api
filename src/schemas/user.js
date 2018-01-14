@@ -5,7 +5,8 @@ export default `
     fname: String!
     lname: String
     email: String!
-    password: String!
+    address: String
+    career: String
   }
 
   type LoginResponse {
