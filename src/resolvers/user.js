@@ -1,7 +1,6 @@
-import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
-import { SECRET_TOKEN_KEY } from '../config/security-config'
+import { generateToken } from '../helpers/security-helpers'
 
 export default {
   Query: {
@@ -81,18 +80,15 @@ export default {
         )
 
         if (isPasswordValid) {
-          // Correct Password
-          const accessToken = await jwt.sign(
+          // Password valid
+          const accessToken = generateToken(
             { email: user.email },
-            SECRET_TOKEN_KEY,
-            {
-              expiresIn: 60 * 10 // 10 minutes
-            }
+            'accessToken'
           )
 
-          const refreshToken = await jwt.sign(
+          const refreshToken = generateToken(
             { email: user.email },
-            SECRET_TOKEN_KEY
+            'refreshToken'
           )
 
           return {
@@ -112,7 +108,6 @@ export default {
           }
         }
       } catch (err) {
-        console.log(err)
         return {
           success: false,
           token: '',
