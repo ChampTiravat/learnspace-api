@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 
 import { SECRET_TOKEN_KEY } from '../config/security-config'
+import { verifyToken } from '../helpers/security-helpers'
 
 /**
  * @name extractUserFromToken()
@@ -21,21 +22,21 @@ const extractUserFromToken = async (req, res, next) => {
     // If access token is not available
     // just skip to the next middleware
     if (!accessToken || accessToken === '') {
-      throw new Error('AccessToken Invalid')
+      throw new Error('AccessToken not specified')
       return next()
     }
 
     // Extract data from the access token
-    const userFromAccessToken = await jwt.verify(accessToken, SECRET_TOKEN_KEY)
+    const userFromAccessToken = await verifyToken(accessToken)
 
     if (!userFromAccessToken.email || userFromAccessToken.email == '') {
       throw new Error('AccessToken Invalid')
     }
-    // If data is present attach the extracted data to
-    // the HTTP Request Object
+    // If data is present, attach the extracted data to the HTTP Request Object
     req.user = userFromAccessToken
   } catch (err) {
     // access token might be invalid. So, we have to create a new one
+
     // Verify refresh token
     if (!refreshToken || refreshToken === '') {
       req.user = null
@@ -43,10 +44,7 @@ const extractUserFromToken = async (req, res, next) => {
     }
 
     // Extract data from refresh token
-    const userFromRefreshToken = await jwt.verify(
-      refreshToken,
-      SECRET_TOKEN_KEY
-    )
+    const userFromRefreshToken = await verifyToken(refreshToken)
 
     // If refresh token is invalid. set req.user to NULL and do nothing
     if (!userFromRefreshToken.email || userFromRefreshToken.email === '') {

@@ -28,6 +28,9 @@ mongoose.connect(DB_CONNECTION_STRING, {
   useMongoClient: true
 })
 
+// Do not send the server's details to the client
+app.disable('X-Powered-By')
+
 // Middlewares
 app.use(cors('*'))
 app.use(extractUserFromToken)

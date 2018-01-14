@@ -13,9 +13,28 @@ export const requiredAuthentication = () => {
 }
 
 /**
+ * @name verifyToken()
+ * @desc Verifying wether the given token is valid or not
+ * @param token string : A token to verify
+ * @return Object(an extracted data from the given token)
+ */
+export const verifyToken = async token => {
+  if (!token || token === '')
+    throw new Error("ERROR: 1st parameter 'token' not specified!")
+
+  const extractedData = await jwt.verify(token, SECRET_TOKEN_KEY)
+
+  if (!extractedData) {
+    throw new Error('ERROR: Token Invalid!')
+  }
+
+  return extractedData
+}
+
+/**
  * @name generateToken()
  * @desc Generate accessToken or refreshToken depending on the parameter
- * @param payload : Object contains data which will be storing in the Token
+ * @param payload object : Object contains data which will be storing in the Token
  * @param type string : Specify wether to generate accessToken
  *     or refreshToken. Possible values are 'accessToken' or 'refreshToken'
  */
