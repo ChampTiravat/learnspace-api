@@ -1,6 +1,8 @@
 import { fileLoader, mergeTypes, mergeResolvers } from 'merge-graphql-schemas'
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
+import { SubscriptionServer } from 'subscriptions-transport-ws'
 import { makeExecutableSchema } from 'graphql-tools'
+import { subscribe, execute } from 'graphql'
 import bodyParser from 'body-parser'
 import mongoose from 'mongoose'
 import bluebird from 'bluebird'
@@ -17,6 +19,7 @@ import extractUserFromToken from './middlewares/extractUserFromToken'
 
 // Initialize App
 const app = express()
+const server = http.createServer(app)
 
 // Connecting to MongoDB
 mongoose.Promise = bluebird
@@ -56,8 +59,20 @@ app.use(
   })
 )
 
+const subscriptionMetaData = {
+  execute,
+  subscribe,
+  schema
+}
+
+const subscriptionConfig = {
+  server,
+  path: '/subscriptions'
+}
+
 // Startint the server
-http.createServer(app).listen(APP_PORT, err => {
+server.listen(APP_PORT, err => {
   if (err) throw err
   console.log(`Server started at ${APP_SERVING_PATH}`)
+  new SubscriptionServer(subscriptionMetaData, subscriptionConfig)
 })
