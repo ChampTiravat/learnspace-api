@@ -37,6 +37,7 @@ export const verifyToken = async token => {
  * @param payload object : Object contains data which will be storing in the Token
  * @param type string : Specify wether to generate accessToken
  *     or refreshToken. Possible values are 'accessToken' or 'refreshToken'
+ * @return string : a generated token
  */
 export const generateToken = async (payload, type) => {
   let token = ''
@@ -56,4 +57,20 @@ export const generateToken = async (payload, type) => {
   }
 
   return token
+}
+
+/**
+ * @name generateNewTokensIfExpired()
+ * @desc Generate new both access/refresh tokens of old accessToken is expired
+ * @param payload object : a payload from old refreshToken
+ * @return Object (contains new refresh/access tokens)
+ */
+export const generateNewTokensIfExpired = async payload => {
+  if (!payload || payload == null)
+    throw new Error("ERROR: 1st parameter 'refreshToken' not specified!")
+
+  const newRefreshToken = await generateToken(payload, 'refreshToken')
+  const newAccessToken = await generateToken(payload, 'accessToken')
+
+  return { newRefreshToken, newAccessToken }
 }

@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken'
 
-import { SECRET_TOKEN_KEY } from '../config/security-config'
-import { verifyToken } from '../helpers/security-helpers'
+import {
+  verifyToken,
+  generateNewTokensIfExpired
+} from '../helpers/security-helpers'
 
 /**
  * @name extractUserFromToken()
@@ -19,8 +21,7 @@ const extractUserFromToken = async (req, res, next) => {
   const refreshToken = await req.headers['x-refresh-token']
 
   try {
-    // If access token is not available
-    // just skip to the next middleware
+    // If access token is not available. just skip to the next middleware
     if (!accessToken || accessToken === '') {
       throw new Error('AccessToken not specified')
       return next()
@@ -44,6 +45,7 @@ const extractUserFromToken = async (req, res, next) => {
     }
 
     // Extract data from refresh token
+
     const userFromRefreshToken = await verifyToken(refreshToken)
 
     // If refresh token is invalid. set req.user to NULL and do nothing
@@ -53,18 +55,10 @@ const extractUserFromToken = async (req, res, next) => {
     }
 
     // If refresh token is valid. Created new access token and refresh token
-    const newRefreshToken = await jwt.sign(
-      { email: userFromRefreshToken.email },
-      SECRET_TOKEN_KEY
-    )
-
-    const newAccessToken = await jwt.sign(
-      { email: userFromRefreshToken.email },
-      SECRET_TOKEN_KEY,
-      {
-        expiresIn: 60 * 10 // 10 minutes
-      }
-    )
+    const {
+      newRefreshToken,
+      newAccessToken
+    } = await generateNewTokensIfExpired(userFromRefreshToken)
 
     // and send theme back the the client
     res.set('Access-Control-Expose-Headers', 'x-access-token, x-refresh-token')
