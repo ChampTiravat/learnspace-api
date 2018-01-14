@@ -16,6 +16,7 @@ import { APP_SERVING_PATH, APP_PORT } from './config/application-config'
 import { DB_CONNECTION_STRING } from './config/database-config'
 
 import extractUserFromToken from './middlewares/extractUserFromToken'
+import models from './models'
 
 // Initialize App
 const app = express()
@@ -46,7 +47,10 @@ app.use(
   graphqlExpress(req => ({
     schema,
     debug: process.env.NODE_ENV === 'development' ? true : false,
-    context: { user: req.user }
+    context: {
+      user: req.user,
+      models
+    }
   }))
 )
 

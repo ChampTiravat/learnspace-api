@@ -2,13 +2,12 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
 import { SECRET_TOKEN_KEY } from '../config/security-config'
-import User from '../models/user'
 
 export default {
   Query: {
-    user: async (parent, { email }, context) => {
+    user: async (parent, { email }, { models }) => {
       try {
-        return await User.findOne({ email })
+        return await models.User.findOne({ email })
       } catch (err) {
         // Returning GraphQL Error Type
         return {
@@ -16,9 +15,9 @@ export default {
         }
       }
     },
-    users: async (parent, args, context) => {
+    users: async (parent, args, { models }) => {
       try {
-        return User.find({})
+        return await models.User.find({})
       } catch (err) {
         // Returning GraphQL Error Type
         return {
@@ -32,13 +31,13 @@ export default {
      * @name register()
      * @desc Create a new user with a given information
      */
-    register: async (parent, args, context) => {
+    register: async (parent, args, { models }) => {
       try {
         const { fname, lname, email, password } = args
         const salt = await bcrypt.genSaltSync(12)
         const hashedPassword = await bcrypt.hashSync(password, salt)
 
-        const user = await User.create({
+        const user = await models.User.create({
           fname,
           lname,
           email,
@@ -61,9 +60,9 @@ export default {
      * @name login()
      * @desc Authenticate user by verifying their email nad password
      */
-    login: async (parent, { email, password }, context) => {
+    login: async (parent, { email, password }, { models }) => {
       try {
-        const user = await User.findOne({ email })
+        const user = await models.User.findOne({ email })
 
         if (!user) {
           // no user found
