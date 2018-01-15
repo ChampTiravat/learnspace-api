@@ -16,19 +16,17 @@ export default {
     user: async (parent, { _id }, { models }) => {
       try {
         const user = await models.User.findOne({ _id: _id })
-        console.log(user)
-        const response = {
+        return {
           _id: user._id,
+          email: user.email,
           fname: user.fname,
           lname: user.lname,
-          email: user.email,
+          career: user.career,
           address: user.address,
           username: user.username,
-          career: user.career,
+          profilePicture: user.profilePicture,
           classrooms: []
         }
-        console.log(response)
-        return response
       } catch (err) {
         // Returning GraphQL Error Type
         return {
@@ -40,6 +38,7 @@ export default {
   Mutation: {
     /**
      * @name register()
+     * @type resolver
      * @desc Create a new user with a given information
      * @param parent : default parameter from ApolloServer
      * @param args : Arguments from GraphQL Query
@@ -73,7 +72,13 @@ export default {
     },
     /**
      * @name login()
+     * @type resolver
      * @desc Authenticate user by verifying their email nad password
+     * @param parent : default parameter from ApolloServer
+     * @param { email } : User email
+     * @param { password } : User password
+     * @param { models } : Mongoose Model
+     * @return GraphQL LoginResponse Type
      */
     login: async (parent, { email, password }, { models }) => {
       try {

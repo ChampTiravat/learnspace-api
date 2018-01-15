@@ -8,6 +8,7 @@ export default `
     username: String
     address: String
     career: String
+    profilePicture: String!
     classrooms: [Classroom]!
   }
 
