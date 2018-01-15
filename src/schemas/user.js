@@ -3,10 +3,12 @@ export default `
   type User {
     _id: String!
     fname: String!
-    lname: String
     email: String!
+    lname: String
+    username: String
     address: String
     career: String
+    classrooms: [Classroom]!
   }
 
   type LoginResponse {
@@ -24,8 +26,7 @@ export default `
   }
 
   type Query {
-      user(email: String, _id: String): User
-      users: [User!]!
+      user(_id: String): User
   }
 
   type Mutation {
@@ -43,4 +44,4 @@ export default `
       ): RegisterResponse!
 
   }
-`;
+`

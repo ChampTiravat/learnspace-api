@@ -4,19 +4,31 @@ import { generateToken } from '../helpers/security-helpers'
 
 export default {
   Query: {
-    user: async (parent, { email }, { models }) => {
+    /**
+     * @name user()
+     * @type resolver
+     * @desc Query information about a specific user corresponding to a given ID
+     * @param parent : default parameter from ApolloServer
+     * @param { _id } : User ID(from MongoDB ObjectID)
+     * @param { models } : Mongoose Model
+     * @return Object : GraphQL User Type
+     */
+    user: async (parent, { _id }, { models }) => {
       try {
-        return await models.User.findOne({ email })
-      } catch (err) {
-        // Returning GraphQL Error Type
-        return {
-          err
+        const user = await models.User.findOne({ _id: _id })
+        console.log(user)
+        const response = {
+          _id: user._id,
+          fname: user.fname,
+          lname: user.lname,
+          email: user.email,
+          address: user.address,
+          username: user.username,
+          career: user.career,
+          classrooms: []
         }
-      }
-    },
-    users: async (parent, args, { models }) => {
-      try {
-        return await models.User.find({})
+        console.log(response)
+        return response
       } catch (err) {
         // Returning GraphQL Error Type
         return {
@@ -29,6 +41,10 @@ export default {
     /**
      * @name register()
      * @desc Create a new user with a given information
+     * @param parent : default parameter from ApolloServer
+     * @param args : Arguments from GraphQL Query
+     * @param { models } : Mongoose Model
+     * @return Object : GraphQL User Type
      */
     register: async (parent, args, { models }) => {
       try {
