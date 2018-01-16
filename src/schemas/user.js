@@ -26,6 +26,11 @@ export default `
     err: String
   }
 
+  type EditProfileResponse {
+    success: Boolean!
+    err: String
+  }
+
   type Query {
       user(_id: String): User
   }
@@ -43,6 +48,15 @@ export default `
         fname: String!,
         lname: String
       ): RegisterResponse!
+
+      editProfile(
+        _id: String!,
+        username: String,
+        fname: String,
+        lname: String,
+        career: String,
+        address: String 
+      ): EditProfileResponse!
 
   }
 `

@@ -15,7 +15,7 @@ export default {
      */
     user: async (parent, { _id }, { models }) => {
       try {
-        const user = await models.User.findOne({ _id: _id })
+        const user = await models.User.findOne({ _id })
         return {
           _id: user._id,
           email: user.email,
@@ -41,16 +41,50 @@ export default {
      * @type resolver
      * @desc Create a new user with a given information
      * @param parent : default parameter from ApolloServer
-     * @param args : Arguments from GraphQL Query
+     * @param { fname } : User's firstname
+     * @param { lname } : User's lastname(Not required)
+     * @param { email } : User's email
+     * @param { password } : User's password(Must be at least >= 8 chars)
      * @param { models } : Mongoose Model
      * @return Object : GraphQL User Type
      */
-    register: async (parent, args, { models }) => {
+    register: async (parent, { fname, lname, email, password }, { models }) => {
+      // Important credentials should not be empty
+      if (fname.length === 0 || email.length === 0 || password.length === 0) {
+        return {
+          success: false,
+          user: null,
+          err:
+            'Important credentials should not be empty. Please provide all important credentials'
+        }
+      }
+
+      // Password Validation
+      if (password.length < 8) {
+        return {
+          success: false,
+          user: null,
+          err: 'Password is too weak, must be at least >= 8 characters'
+        }
+      }
+
       try {
-        const { fname, lname, email, password } = args
+        const ifUserAlreadyExist = await models.User.findOne({ email })
+
+        // User email must be unique
+        if (ifUserAlreadyExist) {
+          return {
+            success: false,
+            user: null,
+            err: 'User already exist with the given credentials'
+          }
+        }
+
+        // Encrypt Password
         const salt = await bcrypt.genSaltSync(12)
         const hashedPassword = await bcrypt.hashSync(password, salt)
 
+        // Saving new user
         const user = await models.User.create({
           fname,
           lname,
@@ -63,10 +97,10 @@ export default {
           user
         }
       } catch (err) {
-        // Has a chance to cause an Duplication Error
         return {
           success: false,
-          user: null
+          user: null,
+          err
         }
       }
     },
@@ -102,12 +136,12 @@ export default {
 
         if (isPasswordValid) {
           // Password valid
-          const accessToken = generateToken(
+          const accessToken = await generateToken(
             { email: user.email },
             'accessToken'
           )
 
-          const refreshToken = generateToken(
+          const refreshToken = await generateToken(
             { email: user.email },
             'refreshToken'
           )
@@ -134,6 +168,45 @@ export default {
           token: '',
           user: null,
           err: err.message
+        }
+      }
+    },
+    /**
+     * @name editProfile()
+     * @type resolver
+     * @desc Edit user's profile information
+     * @param parent : default parameter from ApolloServer
+     * @param { _id } : User ID
+     * @param { username } : New username
+     * @param { fname } : User new firstname
+     * @param { lname } : User new lastname
+     * @param { career } : User new career
+     * @param { address } : User new address
+     * @param { models } : Mongoose Model
+     * @return GraphQL EditProfileResponse Type
+     */
+    editProfile: async (
+      parent,
+      { _id, username, fname, lname, career, address },
+      { models }
+    ) => {
+      try {
+        const expectedFields = [username, fname, lname, career, address]
+        console.log(...expectedFields, _id)
+
+        expectedFields.filter(field => field != '')
+
+        await models.User.findOne({ _id }).update({
+          ...expectedFields
+        })
+
+        return {
+          success: true
+        }
+      } catch (err) {
+        return {
+          success: false,
+          err
         }
       }
     }
