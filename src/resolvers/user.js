@@ -5,7 +5,7 @@ import { generateToken } from '../helpers/security-helpers'
 export default {
   Query: {
     /**
-     * @name user()
+     * @name userProfile()
      * @type resolver
      * @desc Query information about a specific user corresponding to a given ID
      * @param parent : default parameter from ApolloServer
@@ -13,24 +13,45 @@ export default {
      * @param { models } : Mongoose Model
      * @return Object : GraphQL User Type
      */
-    user: async (parent, { _id }, { models }) => {
-      try {
-        const user = await models.User.findOne({ _id })
+    userProfile: async (parent, { _id }, { models }) => {
+      await console.log(_id)
+      // Validation
+      if (!_id || _id == '') {
         return {
-          _id: user._id,
-          email: user.email,
-          fname: user.fname,
-          lname: user.lname,
-          career: user.career,
-          address: user.address,
-          username: user.username,
-          profilePicture: user.profilePicture,
-          classrooms: []
+          user: null,
+          err: {
+            name: 'user',
+            message: 'User ID not specified'
+          }
+        }
+      }
+
+      try {
+        // Finding user
+        const user = await models.User.findOne({ _id })
+
+        return {
+          user: {
+            _id: user._id,
+            email: user.email,
+            fname: user.fname,
+            lname: user.lname,
+            career: user.career,
+            address: user.address,
+            username: user.username,
+            profilePicture: user.profilePicture,
+            classrooms: []
+          },
+          err: null
         }
       } catch (err) {
-        // Returning GraphQL Error Type
+        // If user not found
         return {
-          err
+          user: null,
+          err: {
+            name: 'user',
+            message: 'User not found'
+          }
         }
       }
     }
@@ -54,8 +75,11 @@ export default {
         return {
           success: false,
           user: null,
-          err:
-            'Important credentials should not be empty. Please provide all important credentials'
+          err: {
+            name: 'register',
+            message:
+              'Important credentials should not be empty. Please provide all important credentials'
+          }
         }
       }
 
@@ -64,7 +88,10 @@ export default {
         return {
           success: false,
           user: null,
-          err: 'Password is too weak, must be at least >= 8 characters'
+          err: {
+            name: 'register',
+            message: 'Password is too weak, must be at least >= 8 characters'
+          }
         }
       }
 
@@ -76,7 +103,10 @@ export default {
           return {
             success: false,
             user: null,
-            err: 'User already exist with the given credentials'
+            err: {
+              name: 'register',
+              message: 'User already exist with the given credentials'
+            }
           }
         }
 
@@ -100,7 +130,10 @@ export default {
         return {
           success: false,
           user: null,
-          err
+          err: {
+            name: 'register',
+            message: 'Server Error'
+          }
         }
       }
     },
@@ -124,7 +157,10 @@ export default {
             success: false,
             token: '',
             user: null,
-            err: 'User not found'
+            err: {
+              name: 'login',
+              message: 'User not found'
+            }
           }
         }
 
@@ -150,8 +186,7 @@ export default {
             success: true,
             refreshToken,
             accessToken,
-            user,
-            err: ''
+            user
           }
         } else {
           // Wrong Password
@@ -159,7 +194,10 @@ export default {
             success: false,
             token: '',
             user: null,
-            err: 'Wrong Password'
+            err: {
+              name: 'login',
+              message: 'Wrong Password'
+            }
           }
         }
       } catch (err) {
@@ -167,7 +205,10 @@ export default {
           success: false,
           token: '',
           user: null,
-          err: err.message
+          err: {
+            name: 'login',
+            message: 'Server Error'
+          }
         }
       }
     },
@@ -206,7 +247,10 @@ export default {
       } catch (err) {
         return {
           success: false,
-          err
+          err: {
+            name: 'editProfile',
+            message: 'Server Error'
+          }
         }
       }
     }

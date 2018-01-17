@@ -12,27 +12,32 @@ export default `
     classrooms: [Classroom]!
   }
 
+  type UserProfileResponse {
+    user: User
+    err: Error
+  }
+
   type LoginResponse {
     success: Boolean!
     refreshToken: String
     accessToken: String
     user: User
-    err: String
+    err: Error 
   }
 
   type RegisterResponse {
     success: Boolean!
     user: User
-    err: String
+    err: Error 
   }
 
   type EditProfileResponse {
     success: Boolean!
-    err: String
+    err: Error 
   }
 
   type Query {
-      user(_id: String): User
+      userProfile(_id: String): UserProfileResponse!
   }
 
   type Mutation {
