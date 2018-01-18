@@ -3,27 +3,41 @@ export default `
   type User {
     _id: String!
     fname: String!
-    lname: String
     email: String!
-    password: String!
+    lname: String
+    username: String
+    address: String
+    career: String
+    profilePicture: String!
+    classrooms: [Classroom]!
+  }
+
+  type UserProfileResponse {
+    user: User
+    err: Error
   }
 
   type LoginResponse {
     success: Boolean!
-    token: String
+    refreshToken: String
+    accessToken: String
     user: User
-    err: String
+    err: Error 
   }
 
   type RegisterResponse {
     success: Boolean!
     user: User
-    err: String
+    err: Error 
+  }
+
+  type EditProfileResponse {
+    success: Boolean!
+    err: Error 
   }
 
   type Query {
-      user(email: String, _id: String): User
-      users: [User!]!
+      userProfile(_id: String): UserProfileResponse!
   }
 
   type Mutation {
@@ -40,5 +54,14 @@ export default `
         lname: String
       ): RegisterResponse!
 
+      editProfile(
+        _id: String!,
+        username: String,
+        fname: String,
+        lname: String,
+        career: String,
+        address: String 
+      ): EditProfileResponse!
+
   }
-`;
+`
