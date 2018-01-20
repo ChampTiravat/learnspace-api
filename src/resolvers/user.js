@@ -14,7 +14,6 @@ export default {
      * @return Object : GraphQL User Type
      */
     userProfile: async (parent, { _id }, { models }) => {
-      await console.log(_id)
       // Validation
       if (!_id || _id == '') {
         return {
@@ -45,7 +44,6 @@ export default {
           err: null
         }
       } catch (err) {
-        // If user not found
         return {
           user: null,
           err: {
@@ -148,11 +146,24 @@ export default {
      * @return GraphQL LoginResponse Type
      */
     login: async (parent, { email, password }, { models }) => {
+      // Email and Password are required
+      if (!email || email == '' || !password || password == '') {
+        return {
+          success: false,
+          token: '',
+          user: null,
+          err: {
+            name: 'login',
+            message: 'Email or Password not specified'
+          }
+        }
+      }
+
       try {
         const user = await models.User.findOne({ email })
 
         if (!user) {
-          // no user found
+          // User not found
           return {
             success: false,
             token: '',
@@ -189,7 +200,7 @@ export default {
             user
           }
         } else {
-          // Wrong Password
+          // Invalid Password
           return {
             success: false,
             token: '',
@@ -231,25 +242,34 @@ export default {
       { _id, username, fname, lname, career, address },
       { models }
     ) => {
-      try {
-        const expectedFields = [username, fname, lname, career, address]
-        console.log(...expectedFields, _id)
-
-        expectedFields.filter(field => field != '')
-
-        await models.User.findOne({ _id }).update({
-          ...expectedFields
-        })
-
-        return {
-          success: true
-        }
-      } catch (err) {
+      // Validation
+      if (!_id || _id == '') {
         return {
           success: false,
           err: {
             name: 'editProfile',
-            message: 'Server Error'
+            message: "Error 'ID' not specified"
+          }
+        }
+
+        try {
+          // Update user info
+          const result = await models.User.findOneAndUpdate(
+            { _id },
+            { username, fname, lname, career, address }
+          )
+
+          return {
+            success: true,
+            err: null
+          }
+        } catch (err) {
+          return {
+            success: false,
+            err: {
+              name: 'editProfile',
+              message: 'Server Error'
+            }
           }
         }
       }
