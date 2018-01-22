@@ -12,5 +12,19 @@ export default `
     subject: String!
     thumbnail: String!
   }
+
+  type CreateClassroomResponse {
+    success: Boolean!
+    classroomID: String 
+    err: Error
+  }
+
+  type Mutation {
+    createClassroom(
+      name: String!,
+      description: String!,
+      subject: String!
+    ) : CreateClassroomResponse!
+  }
   
 `

@@ -18,6 +18,7 @@ const ClassroomSchema = new Schema({
   },
   creator: {
     type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
   outline: [CourseOutlineSchema],
@@ -48,5 +49,7 @@ const ClassroomSchema = new Schema({
     default: DEFAULT_CLASSROOM_THUMBNAIL
   }
 })
+
+mongoose.model('course-outline', CourseOutlineSchema)
 
 export default mongoose.model('classrooms', ClassroomSchema)
