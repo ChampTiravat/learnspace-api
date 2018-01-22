@@ -263,12 +263,12 @@ export default {
         if (isPasswordValid) {
           // Password valid
           const accessToken = await generateToken(
-            { email: user.email },
+            { email: user.email, _id: user._id },
             'accessToken'
           )
 
           const refreshToken = await generateToken(
-            { email: user.email },
+            { email: user.email, _id: user._id },
             'refreshToken'
           )
 
