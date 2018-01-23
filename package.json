@@ -9,8 +9,7 @@
 	"scripts": {
 		"test": "jest",
 		"dev-server": "nodemon --exec babel-node ./src/server.js",
-		"test-server":
-			"export SECRET_TOKEN_KEY='very secure key', TESTING='true'; nodemon --exec babel-node ./src/server.js"
+		"test-server": "export SECRET_TOKEN_KEY='very secure key', TESTING='true'; nodemon --exec babel-node ./src/server.js"
 	},
 	"dependencies": {
 		"apollo-server-express": "^1.1.7",
@@ -30,7 +29,8 @@
 		"nodemon": "^1.12.1",
 		"passport": "^0.4.0",
 		"passport-jwt": "^3.0.0",
-		"subscriptions-transport-ws": "^0.9.1"
+		"subscriptions-transport-ws": "^0.9.1",
+		"validator": "^9.2.0"
 	},
 	"devDependencies": {
 		"babel-cli": "^6.26.0",
