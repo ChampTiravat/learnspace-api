@@ -7,7 +7,7 @@ export default `
     creator: User! 
     outline: [String]!
     members: [User!]!
-    posts: [String]!
+    posts: [Post]!
     joinRequests: [User]!
     subject: String!
     thumbnail: String!
@@ -17,6 +17,15 @@ export default `
     success: Boolean!
     classroomID: String 
     err: Error
+  }
+
+  type ClassroomProfileResponse {
+    classroom: Classroom
+    err: Error
+  }
+
+  type Query {
+    classroomProfile(_id: String!): ClassroomProfileResponse!
   }
 
   type Mutation {
