@@ -33,8 +33,13 @@ export default {
       }
 
       try {
-        // Finding user
+        // Querying user
         const user = await models.User.findOne({ _id })
+
+        // Querying user's classrooms
+        const userClassrooms = await models.Classroom.find({
+          creator: user._id
+        })
 
         if (!user) {
           return {
@@ -55,8 +60,8 @@ export default {
             career: user.career,
             address: user.address,
             username: user.username,
-            profilePicture: user.profilePicture,
-            classrooms: []
+            classrooms: userClassrooms,
+            profilePicture: user.profilePicture
           },
           err: null
         }
