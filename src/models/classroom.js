@@ -1,6 +1,7 @@
 import mongoose, { Schema } from 'mongoose'
 
-const DEFAULT_CLASSROOM_THUMBNAIL = 'http://some-url.com/some-image.jpg'
+const DEFAULT_CLASSROOM_THUMBNAIL =
+  '/static/images/background/login-background.jpg'
 
 const CourseOutlineSchema = new Schema({
   isPassed: Boolean,
