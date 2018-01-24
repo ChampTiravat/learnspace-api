@@ -4,8 +4,8 @@ const DEFAULT_CLASSROOM_THUMBNAIL =
   '/static/images/background/login-background.jpg'
 
 const CourseOutlineSchema = new Schema({
-  isPassed: Boolean,
-  name: String
+  passed: Boolean,
+  title: String
 })
 
 const ClassroomSchema = new Schema({
