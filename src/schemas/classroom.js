@@ -1,11 +1,16 @@
 export default `
 
+  type Outline {
+    passed: Boolean!
+    title: String!
+  }
+
   type Classroom {
     _id: String!
     name: String!
     description: String!
     creator: User! 
-    outline: [String]!
+    outline: [Outline]!
     members: [User!]!
     posts: [Post]!
     joinRequests: [User]!
