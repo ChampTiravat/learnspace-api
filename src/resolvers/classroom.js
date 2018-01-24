@@ -25,8 +25,13 @@ export default {
       }
 
       try {
-        // Finding a classroom
+        // Quering a classroom
         const classroom = await models.Classroom.findOne({ _id })
+
+        // Quering a creator of the classroom
+        const classroomCreator = await models.User.findOne({
+          _id: classroom.creator
+        })
 
         if (!classroom) {
           return {
@@ -38,6 +43,16 @@ export default {
           }
         }
 
+        if (!classroomCreator) {
+          return {
+            classroom: null,
+            err: {
+              name: 'classroom',
+              message: 'Server Error'
+            }
+          }
+        }
+
         return {
           classroom: {
             _id: classroom._id,
@@ -45,11 +60,7 @@ export default {
             description: classroom.description,
             subject: classroom.subject,
             thumbnail: classroom.thumbnail,
-            creator: {
-              _id: classroom.creator,
-              fname: 'tiravat',
-              lname: 'thaisubvorakul'
-            },
+            creator: classroomCreator,
             outline: [
               { title: 'Explain course outline', passed: true },
               { title: 'Calculus and Analytic Geometry', passed: true },
