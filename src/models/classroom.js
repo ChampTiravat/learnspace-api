@@ -48,7 +48,9 @@ const ClassroomSchema = new Schema({
   thumbnail: {
     type: String,
     default: DEFAULT_CLASSROOM_THUMBNAIL
-  }
+  },
+  createdAt: { type: Date, default: Date.now() },
+  updatedAt: { type: Date, default: Date.now() }
 })
 
 mongoose.model('course-outline', CourseOutlineSchema)
