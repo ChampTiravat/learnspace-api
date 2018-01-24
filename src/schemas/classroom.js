@@ -29,8 +29,14 @@ export default `
     err: Error
   }
 
+  type UserClassroomsResponse {
+    classrooms: [Classroom]!
+    err: Error
+  }
+
   type Query {
     classroomProfile(_id: String!): ClassroomProfileResponse!
+    userClassrooms(_id: String!): UserClassroomsResponse!
   }
 
   type Mutation {

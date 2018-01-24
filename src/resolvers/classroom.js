@@ -6,9 +6,48 @@ export default {
     /**
      * @name
      * @type resolver
-     * @desc
+     * @desc Send the classrooms corresponding to a given user
      * @param parent : default parameter from ApolloServer
-     * @param { _id } :
+     * @param { _id } : User ID
+     * @param { models } : Mongoose Model
+     * @return Object : GraphQL
+     */
+    userClassrooms: async (_, { _id }, { models }) => {
+      // Input Validation
+      if (!_id || _id == '' || !OBJECT_ID_REGEX.test(_id)) {
+        return {
+          classroom: null,
+          err: {
+            name: 'classroom',
+            message: 'User ID invalid or not specified'
+          }
+        }
+      }
+
+      try {
+        // Quering a classroom
+        const classrooms = await models.Classroom.find({ creator: _id })
+
+        return {
+          classrooms,
+          err: null
+        }
+      } catch (err) {
+        return {
+          classroom: null,
+          err: {
+            name: 'classroom',
+            message: 'Server Error'
+          }
+        }
+      }
+    },
+    /**
+     * @name classroomProfile()
+     * @type resolver
+     * @desc Send classroom information corresponding to a given Classroom ID
+     * @param parent : default parameter from ApolloServer
+     * @param { _id } : Classroom ID
      * @param { models } : Mongoose Model
      * @return Object : GraphQL
      */
