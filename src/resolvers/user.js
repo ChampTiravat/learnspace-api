@@ -1,13 +1,11 @@
+import { isEmail, isAlpha, isEmpty, trim, isMongoId } from 'validator'
 import bcrypt from 'bcrypt'
 
 import { generateToken } from '../helpers/security-helpers'
-
-const EMAIL_REGEX = /.+@([a-zA-Z0-9-]+)\.[a-zA-Z0-9-]+$/
-const USER_ID_REGEX = /^([0-9a-f]{24})$/i
-const USERNAME_REGEX = /[a-zA-Z0-9_]+/
-const TEXT_REGEX = /^([\w]*)$/u
-const NAME_REGEX = /([\w]*)/u
-const PASSWORD_REGEX = /.*/
+import {
+  ENG_THA_NUM_ALPHA,
+  PASSWORD_PATTERN
+} from '../constants/regex-patterns'
 
 export default {
   Query: {
@@ -22,7 +20,7 @@ export default {
      */
     userProfile: async (_, { _id }, { models }) => {
       // Input Validation
-      if (!_id || _id == '' || !USER_ID_REGEX.test(_id)) {
+      if (isEmpty(trim(_id)) || !isMongoId(_id)) {
         return {
           user: null,
           err: {
@@ -92,10 +90,10 @@ export default {
     register: async (_, { fname, lname, email, password }, { models }) => {
       // Inputs Validation
       if (
-        fname.length === 0 ||
-        email.length === 0 ||
-        password.length === 0 ||
-        lname.length === 0
+        isEmpty(trim(fname)) ||
+        isEmpty(trim(email)) ||
+        isEmpty(trim(lname)) ||
+        isEmpty(trim(password))
       ) {
         return {
           success: false,
@@ -109,7 +107,7 @@ export default {
       }
 
       // Email format Validation
-      if (!EMAIL_REGEX.test(email)) {
+      if (!isEmail(email)) {
         return {
           success: false,
           user: null,
@@ -120,7 +118,7 @@ export default {
         }
       }
 
-      if (!NAME_REGEX.test(fname)) {
+      if (!ENG_THA_NUM_ALPHA.test(fname)) {
         return {
           success: false,
           user: null,
@@ -131,7 +129,7 @@ export default {
         }
       }
 
-      if (!NAME_REGEX.test(lname)) {
+      if (!ENG_THA_NUM_ALPHA.test(lname)) {
         return {
           success: false,
           user: null,
@@ -142,7 +140,7 @@ export default {
         }
       }
 
-      if (!PASSWORD_REGEX.test(password)) {
+      if (!PASSWORD_PATTERN.test(password)) {
         return {
           success: false,
           user: null,
@@ -219,7 +217,7 @@ export default {
      */
     login: async (_, { email, password }, { models }) => {
       // Inputs Validation
-      if (!email || email == '' || !password || password == '') {
+      if (isEmpty(trim(email)) || isEmpty(trim(password))) {
         return {
           success: false,
           token: '',
@@ -231,7 +229,7 @@ export default {
         }
       }
 
-      if (!EMAIL_REGEX.test(email)) {
+      if (!isEmail(email)) {
         return {
           success: false,
           token: '',
@@ -239,6 +237,17 @@ export default {
           err: {
             name: 'login',
             message: 'Email is not valid'
+          }
+        }
+      }
+
+      if (!PASSWORD_PATTERN.test(password)) {
+        return {
+          success: false,
+          user: null,
+          err: {
+            name: 'login',
+            message: 'Password is not valid'
           }
         }
       }
@@ -331,7 +340,7 @@ export default {
       )
 
       // Validation
-      if (!_id || _id == '') {
+      if (isEmpty(trim(_id))) {
         return {
           success: false,
           err: {
@@ -341,7 +350,7 @@ export default {
         }
       }
 
-      if (!USER_ID_REGEX.test(_id)) {
+      if (!isMongoId(_id)) {
         return {
           success: false,
           err: {
@@ -351,7 +360,7 @@ export default {
         }
       }
 
-      if (username & !USERNAME_REGEX.test(username)) {
+      if (username & !ENG_THA_NUM_ALPHA.test(username)) {
         return {
           success: false,
           err: {
@@ -361,7 +370,7 @@ export default {
         }
       }
 
-      if (fname & !NAME_REGEX.test(fname)) {
+      if (fname & !ENG_THA_NUM_ALPHA.test(fname)) {
         return {
           success: false,
           err: {
@@ -371,7 +380,7 @@ export default {
         }
       }
 
-      if (lname & !NAME_REGEX.test(lname)) {
+      if (lname & !ENG_THA_NUM_ALPHA.test(lname)) {
         return {
           success: false,
           err: {
@@ -381,7 +390,7 @@ export default {
         }
       }
 
-      if (career & !TEXT_REGEX.test(career)) {
+      if (career & !ENG_THA_NUM_ALPHA.test(career)) {
         return {
           success: false,
           err: {
@@ -391,7 +400,7 @@ export default {
         }
       }
 
-      if (address & !TEXT_REGEX.test(address)) {
+      if (address & !ENG_THA_NUM_ALPHA.test(address)) {
         return {
           success: false,
           err: {
