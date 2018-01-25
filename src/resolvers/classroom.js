@@ -1,5 +1,4 @@
-const TEXT_REGEX = /([\w ]+)/u
-const OBJECT_ID_REGEX = /^[a-f0-9]{24}$/
+import { isAlpha, isEmpty, trim, isMongoId } from 'validator'
 
 export default {
   Query: {
@@ -14,9 +13,9 @@ export default {
      */
     userClassrooms: async (_, { _id }, { models }) => {
       // Input Validation
-      if (!_id || _id == '' || !OBJECT_ID_REGEX.test(_id)) {
+      if (isEmpty(trim(_id)) || !isMongoId(_id)) {
         return {
-          classroom: null,
+          classrooms: [],
           err: {
             name: 'classroom',
             message: 'User ID invalid or not specified'
@@ -27,14 +26,13 @@ export default {
       try {
         // Quering a classroom
         const classrooms = await models.Classroom.find({ creator: _id })
-
         return {
           classrooms,
           err: null
         }
       } catch (err) {
         return {
-          classroom: null,
+          classrooms: [],
           err: {
             name: 'classroom',
             message: 'Server Error'
@@ -53,7 +51,7 @@ export default {
      */
     classroomProfile: async (_, { _id }, { models }) => {
       // Input Validation
-      if (!_id || _id == '' || !OBJECT_ID_REGEX.test(_id)) {
+      if (isEmpty(trim(_id)) || !isMongoId(_id)) {
         return {
           classroom: null,
           err: {
@@ -168,7 +166,7 @@ export default {
       { user, models }
     ) => {
       // User must be authenticated
-      if (!user || !user._id) {
+      if (!user || isEmpty(trim(user._id)) || isMongoId(user._id)) {
         return {
           success: false,
           classroomID: '',
@@ -180,7 +178,11 @@ export default {
       }
 
       // All GraphQL Mutation parameters are required
-      if (!name || !description || !subject) {
+      if (
+        isEmpty(trim(name)) ||
+        isEmpty(trim(description)) ||
+        isEmpty(trim(subject))
+      ) {
         return {
           success: false,
           classroomID: '',
@@ -192,7 +194,7 @@ export default {
       }
 
       // Validation
-      if (!TEXT_REGEX.test(name))
+      if (!isAlpha(name))
         return {
           success: false,
           classroomID: '',
@@ -202,7 +204,7 @@ export default {
           }
         }
 
-      if (!TEXT_REGEX.test(description))
+      if (!isAlpha(description))
         return {
           success: false,
           classroomID: '',
@@ -212,7 +214,7 @@ export default {
           }
         }
 
-      if (!TEXT_REGEX.test(subject))
+      if (!isAlpha(subject))
         return {
           success: false,
           classroomID: '',
