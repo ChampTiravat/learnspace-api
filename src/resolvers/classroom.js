@@ -1,5 +1,7 @@
 import { isAlpha, isEmpty, trim, isMongoId } from 'validator'
 
+import { ENG_THA_NUM_ALPHA } from '../constants/regex-patterns'
+
 export default {
   Query: {
     /**
@@ -194,7 +196,7 @@ export default {
       }
 
       // Validation
-      if (!isAlpha(name))
+      if (!ENG_THA_NUM_ALPHA.test(name))
         return {
           success: false,
           classroomID: '',
@@ -204,7 +206,7 @@ export default {
           }
         }
 
-      if (!isAlpha(description))
+      if (!ENG_THA_NUM_ALPHA.test(description))
         return {
           success: false,
           classroomID: '',
@@ -214,7 +216,7 @@ export default {
           }
         }
 
-      if (!isAlpha(subject))
+      if (!ENG_THA_NUM_ALPHA.test(subject))
         return {
           success: false,
           classroomID: '',
