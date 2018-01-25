@@ -2,6 +2,13 @@ import bcrypt from 'bcrypt'
 
 import { generateToken } from '../helpers/security-helpers'
 
+const EMAIL_REGEX = /.+@([a-zA-Z0-9-]+)\.[a-zA-Z0-9-]+$/
+const USER_ID_REGEX = /^([0-9a-f]{24})$/i
+const USERNAME_REGEX = /[a-zA-Z0-9_]+/
+const TEXT_REGEX = /^([\w]*)$/u
+const NAME_REGEX = /([\w]*)/u
+const PASSWORD_REGEX = /.*/
+
 export default {
   Query: {
     /**
@@ -13,22 +20,36 @@ export default {
      * @param { models } : Mongoose Model
      * @return Object : GraphQL User Type
      */
-    userProfile: async (parent, { _id }, { models }) => {
-      await console.log(_id)
-      // Validation
-      if (!_id || _id == '') {
+    userProfile: async (_, { _id }, { models }) => {
+      // Input Validation
+      if (!_id || _id == '' || !USER_ID_REGEX.test(_id)) {
         return {
           user: null,
           err: {
             name: 'user',
-            message: 'User ID not specified'
+            message: 'User ID invalid or not specified'
           }
         }
       }
 
       try {
-        // Finding user
+        // Querying user
         const user = await models.User.findOne({ _id })
+
+        // Querying user's classrooms
+        const userClassrooms = await models.Classroom.find({
+          creator: user._id
+        })
+
+        if (!user) {
+          return {
+            user: null,
+            err: {
+              name: 'user',
+              message: 'User not found'
+            }
+          }
+        }
 
         return {
           user: {
@@ -39,18 +60,17 @@ export default {
             career: user.career,
             address: user.address,
             username: user.username,
-            profilePicture: user.profilePicture,
-            classrooms: []
+            classrooms: userClassrooms,
+            profilePicture: user.profilePicture
           },
           err: null
         }
       } catch (err) {
-        // If user not found
         return {
           user: null,
           err: {
             name: 'user',
-            message: 'User not found'
+            message: 'Server Error'
           }
         }
       }
@@ -69,9 +89,14 @@ export default {
      * @param { models } : Mongoose Model
      * @return Object : GraphQL User Type
      */
-    register: async (parent, { fname, lname, email, password }, { models }) => {
-      // Important credentials should not be empty
-      if (fname.length === 0 || email.length === 0 || password.length === 0) {
+    register: async (_, { fname, lname, email, password }, { models }) => {
+      // Inputs Validation
+      if (
+        fname.length === 0 ||
+        email.length === 0 ||
+        password.length === 0 ||
+        lname.length === 0
+      ) {
         return {
           success: false,
           user: null,
@@ -79,6 +104,51 @@ export default {
             name: 'register',
             message:
               'Important credentials should not be empty. Please provide all important credentials'
+          }
+        }
+      }
+
+      // Email format Validation
+      if (!EMAIL_REGEX.test(email)) {
+        return {
+          success: false,
+          user: null,
+          err: {
+            name: 'register',
+            message: 'Email is not valid'
+          }
+        }
+      }
+
+      if (!NAME_REGEX.test(fname)) {
+        return {
+          success: false,
+          user: null,
+          err: {
+            name: 'register',
+            message: 'Firstname is not valid'
+          }
+        }
+      }
+
+      if (!NAME_REGEX.test(lname)) {
+        return {
+          success: false,
+          user: null,
+          err: {
+            name: 'register',
+            message: 'Lastname is not valid'
+          }
+        }
+      }
+
+      if (!PASSWORD_REGEX.test(password)) {
+        return {
+          success: false,
+          user: null,
+          err: {
+            name: 'register',
+            message: 'Password is not valid'
           }
         }
       }
@@ -147,12 +217,37 @@ export default {
      * @param { models } : Mongoose Model
      * @return GraphQL LoginResponse Type
      */
-    login: async (parent, { email, password }, { models }) => {
+    login: async (_, { email, password }, { models }) => {
+      // Inputs Validation
+      if (!email || email == '' || !password || password == '') {
+        return {
+          success: false,
+          token: '',
+          user: null,
+          err: {
+            name: 'login',
+            message: 'Email or Password not specified'
+          }
+        }
+      }
+
+      if (!EMAIL_REGEX.test(email)) {
+        return {
+          success: false,
+          token: '',
+          user: null,
+          err: {
+            name: 'login',
+            message: 'Email is not valid'
+          }
+        }
+      }
+
       try {
         const user = await models.User.findOne({ email })
 
         if (!user) {
-          // no user found
+          // User not found
           return {
             success: false,
             token: '',
@@ -173,12 +268,12 @@ export default {
         if (isPasswordValid) {
           // Password valid
           const accessToken = await generateToken(
-            { email: user.email },
+            { email: user.email, _id: user._id },
             'accessToken'
           )
 
           const refreshToken = await generateToken(
-            { email: user.email },
+            { email: user.email, _id: user._id },
             'refreshToken'
           )
 
@@ -189,7 +284,7 @@ export default {
             user
           }
         } else {
-          // Wrong Password
+          // Invalid Password
           return {
             success: false,
             token: '',
@@ -227,22 +322,95 @@ export default {
      * @return GraphQL EditProfileResponse Type
      */
     editProfile: async (
-      parent,
+      _,
       { _id, username, fname, lname, career, address },
       { models }
     ) => {
+      const fieldsToUpdate = [username, fname, lname, career, address].filter(
+        input => !!input
+      )
+
+      // Validation
+      if (!_id || _id == '') {
+        return {
+          success: false,
+          err: {
+            name: 'editProfile',
+            message: "Error 'ID' not specified"
+          }
+        }
+      }
+
+      if (!USER_ID_REGEX.test(_id)) {
+        return {
+          success: false,
+          err: {
+            name: 'editProfile',
+            message: 'User ID not valid or not specified'
+          }
+        }
+      }
+
+      if (username & !USERNAME_REGEX.test(username)) {
+        return {
+          success: false,
+          err: {
+            name: 'editProfile',
+            message: 'Username is not valid'
+          }
+        }
+      }
+
+      if (fname & !NAME_REGEX.test(fname)) {
+        return {
+          success: false,
+          err: {
+            name: 'editProfile',
+            message: 'Firstname is not valid'
+          }
+        }
+      }
+
+      if (lname & !NAME_REGEX.test(lname)) {
+        return {
+          success: false,
+          err: {
+            name: 'editProfile',
+            message: 'Lastname is not valid'
+          }
+        }
+      }
+
+      if (career & !TEXT_REGEX.test(career)) {
+        return {
+          success: false,
+          err: {
+            name: 'editProfile',
+            message: 'Career is not valid'
+          }
+        }
+      }
+
+      if (address & !TEXT_REGEX.test(address)) {
+        return {
+          success: false,
+          err: {
+            name: 'editProfile',
+            message: 'Address is not valid'
+          }
+        }
+      }
+
       try {
-        const expectedFields = [username, fname, lname, career, address]
-        console.log(...expectedFields, _id)
-
-        expectedFields.filter(field => field != '')
-
-        await models.User.findOne({ _id }).update({
-          ...expectedFields
-        })
+        // Update user info
+        const result = await models.User.findOneAndUpdate(
+          { _id },
+          { ...fieldsToUpdate }
+        )
 
         return {
-          success: true
+          success: true,
+          err: null
         }
       } catch (err) {
         return {
