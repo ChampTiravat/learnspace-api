@@ -5,13 +5,13 @@ import { ENG_THA_NUM_ALPHA } from '../constants/regex-patterns'
 export default {
   Query: {
     /**
-     * @name
+     * @name userClassrooms()
      * @type resolver
      * @desc Send the classrooms corresponding to a given user
      * @param parent : default parameter from ApolloServer
-     * @param { _id } : User ID
-     * @param { models } : Mongoose Model
-     * @return Object : GraphQL
+     * @param { _id } [GRAPHQL_ARGS] : User ID
+     * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
+     * @return Object : GraphQL UserClassroomsResponse Type
      */
     userClassrooms: async (_, { _id }, { models }) => {
       // Input Validation
@@ -47,8 +47,8 @@ export default {
      * @type resolver
      * @desc Send classroom information corresponding to a given Classroom ID
      * @param parent : default parameter from ApolloServer
-     * @param { _id } : Classroom ID
-     * @param { models } : Mongoose Model
+     * @param { _id } [GRAPHQL_ARGS] : Classroom ID
+     * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return Object : GraphQL
      */
     classroomProfile: async (_, { _id }, { models }) => {
@@ -148,18 +148,18 @@ export default {
         }
       }
     }
-  },
+  }, // End Query
   Mutation: {
     /**
      * @name createClassroom()
      * @type resolver
      * @desc Create a new classroom with a given information
      * @param parent : default parameter from ApolloServer
-     * @param { name } : classroom name
-     * @param { description } : classroom description
-     * @param { subject } : classroom main subject
-     * @param { user } : Current logged-in user(used as a classroom creator)
-     * @param { models } : Mongoose Model
+     * @param { name } [GRAPHQL_ARGS] : classroom name
+     * @param { subject } [GRAPHQL_ARGS] : classroom main subject
+     * @param { description } [GRAPHQL_ARGS] : classroom description
+     * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
+     * @param { user } [GRAPHQL_CONTEXT] : Current logged-in user(used as a classroom creator)
      * @return Object : GraphQL CraeteClassroomResponse Type
      */
     createClassroom: async (
@@ -168,7 +168,7 @@ export default {
       { user, models }
     ) => {
       // User must be authenticated
-      if (!user || isEmpty(trim(user._id)) || isMongoId(user._id)) {
+      if (isEmpty(trim(user._id)) || !isMongoId(user._id)) {
         return {
           success: false,
           classroomID: '',
@@ -252,5 +252,5 @@ export default {
         }
       }
     }
-  }
+  } // End Mutation
 }
