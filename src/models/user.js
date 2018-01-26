@@ -6,6 +6,7 @@ const DEFAULT_USER_ROLE = 'user'
 const UserSchema = new Schema({
   fname: {
     type: String,
+    lowercase: true,
     required: true
   },
   email: {
@@ -26,9 +27,9 @@ const UserSchema = new Schema({
     type: String,
     default: DEFAULT_USER_ROLE
   },
-  lname: String,
-  username: String,
-  birthData: Date,
+  lname: { type: String, lowercase: true, required: true },
+  username: { type: String, lowercase: true, unique: true },
+  birthDate: Date,
   address: String,
   career: String,
   createdAt: { type: Date, default: Date.now() },
