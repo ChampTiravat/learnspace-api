@@ -14,18 +14,18 @@ export default {
      * @return Object : GraphQL UserClassroomsResponse Type
      */
     userClassrooms: async (_, { _id }, { models }) => {
-      // Input Validation
-      if (isEmpty(trim(_id)) || !isMongoId(_id)) {
-        return {
-          classrooms: [],
-          err: {
-            name: 'classroom',
-            message: 'User ID invalid or not specified'
+      try {
+        // Input Validation
+        if (isEmpty(trim(_id)) || !isMongoId(_id)) {
+          return {
+            classrooms: [],
+            err: {
+              name: 'classroom',
+              message: 'User ID invalid or not specified'
+            }
           }
         }
-      }
 
-      try {
         // Quering a classroom
         const classrooms = await models.Classroom.find({ creator: _id })
         return {
@@ -52,18 +52,18 @@ export default {
      * @return Object : GraphQL
      */
     classroomProfile: async (_, { _id }, { models }) => {
-      // Input Validation
-      if (isEmpty(trim(_id)) || !isMongoId(_id)) {
-        return {
-          classroom: null,
-          err: {
-            name: 'classroom',
-            message: 'Classroom ID invalid or not specified'
+      try {
+        // Input Validation
+        if (isEmpty(trim(_id)) || !isMongoId(_id)) {
+          return {
+            classroom: null,
+            err: {
+              name: 'classroom',
+              message: 'Classroom ID invalid or not specified'
+            }
           }
         }
-      }
 
-      try {
         // Quering a classroom
         const classroom = await models.Classroom.findOne({ _id })
 
@@ -167,66 +167,66 @@ export default {
       { name, description, subject },
       { user, models }
     ) => {
-      // User must be authenticated
-      if (isEmpty(trim(user._id)) || !isMongoId(user._id)) {
-        return {
-          success: false,
-          classroomID: '',
-          err: {
-            name: 'createClassroom',
-            message: 'Unauthorized Access'
-          }
-        }
-      }
-
-      // All GraphQL Mutation parameters are required
-      if (
-        isEmpty(trim(name)) ||
-        isEmpty(trim(description)) ||
-        isEmpty(trim(subject))
-      ) {
-        return {
-          success: false,
-          classroomID: '',
-          err: {
-            name: 'createClassroom',
-            message: 'Important information should not be empty'
-          }
-        }
-      }
-
-      // Validation
-      if (!ENG_THA_NUM_ALPHA.test(name))
-        return {
-          success: false,
-          classroomID: '',
-          err: {
-            name: 'createClassroom',
-            message: "'name' is invalid or not specified"
-          }
-        }
-
-      if (!ENG_THA_NUM_ALPHA.test(description))
-        return {
-          success: false,
-          classroomID: '',
-          err: {
-            name: 'createClassroom',
-            message: "'description' is invalid or not specified"
-          }
-        }
-
-      if (!ENG_THA_NUM_ALPHA.test(subject))
-        return {
-          success: false,
-          classroomID: '',
-          err: {
-            name: 'createClassroom',
-            message: "'subject' is invalid or not specified"
-          }
-        }
-
       try {
+        // User must be authenticated
+        if (isEmpty(trim(user._id)) || !isMongoId(user._id)) {
+          return {
+            success: false,
+            classroomID: '',
+            err: {
+              name: 'createClassroom',
+              message: 'Unauthorized Access'
+            }
+          }
+        }
+
+        // All GraphQL Mutation parameters are required
+        if (
+          isEmpty(trim(name)) ||
+          isEmpty(trim(description)) ||
+          isEmpty(trim(subject))
+        ) {
+          return {
+            success: false,
+            classroomID: '',
+            err: {
+              name: 'createClassroom',
+              message: 'Important information should not be empty'
+            }
+          }
+        }
+
+        // Validation
+        if (!ENG_THA_NUM_ALPHA.test(name))
+          return {
+            success: false,
+            classroomID: '',
+            err: {
+              name: 'createClassroom',
+              message: "'name' is invalid or not specified"
+            }
+          }
+
+        if (!ENG_THA_NUM_ALPHA.test(description))
+          return {
+            success: false,
+            classroomID: '',
+            err: {
+              name: 'createClassroom',
+              message: "'description' is invalid or not specified"
+            }
+          }
+
+        if (!ENG_THA_NUM_ALPHA.test(subject))
+          return {
+            success: false,
+            classroomID: '',
+            err: {
+              name: 'createClassroom',
+              message: "'subject' is invalid or not specified"
+            }
+          }
+
         // New Classroom Construction
         const newClassroom = await models.Classroom.create({
           name,

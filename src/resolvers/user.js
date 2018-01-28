@@ -19,18 +19,18 @@ export default {
      * @return Object : GraphQL UserProfileResponse Type
      */
     userProfile: async (_, { _id }, { models }) => {
-      // Input Validation
-      if (isEmpty(trim(_id)) || !isMongoId(_id)) {
-        return {
-          user: null,
-          err: {
-            name: 'user',
-            message: 'User ID invalid or not specified'
+      try {
+        // Input Validation
+        if (isEmpty(trim(_id)) || !isMongoId(_id)) {
+          return {
+            user: null,
+            err: {
+              name: 'user',
+              message: 'User ID invalid or not specified'
+            }
           }
         }
-      }
 
-      try {
         // Querying user
         const user = await models.User.findOne({ _id })
 
@@ -82,87 +82,88 @@ export default {
      * @return Object : GraphQL RegisterResponse Type
      */
     register: async (_, { fname, lname, email, password }, { models }) => {
-      // Inputs Validation
-      if (
-        isEmpty(trim(fname)) ||
-        isEmpty(trim(email)) ||
-        isEmpty(trim(lname)) ||
-        isEmpty(trim(password))
-      ) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message: 'Important credentials should not be empty'
-          }
-        }
-      }
-
-      // Email format Validation
-      if (!isEmail(email) || email.length > 250) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message: 'Email is not valid'
-          }
-        }
-      }
-
-      // Firstname must contains only ENG or THA alphabets
-      // and must be only 1 - 50 characters
-      if (!ENG_THA_NUM_ALPHA.test(fname) || fname.length > 50) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message: 'Firstname is not valid'
-          }
-        }
-      }
-
-      // Lastname must contains only ENG or THA alphabets
-      // and must be only 1 - 50 characters
-      if (!ENG_THA_NUM_ALPHA.test(lname) || lname.length > 50) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message: 'Lastname is not valid'
-          }
-        }
-      }
-
-      // Password may contain anything and must have
-      // a length between 8 - 250 characters
-      if (!PASSWORD_PATTERN.test(password) || password.length > 250) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message: 'Password is not valid'
-          }
-        }
-      }
-
-      // Password Validation
-      if (password.length < 8) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message: 'Password is too weak, must be >= 8, but <= 250 characters'
-          }
-        }
-      }
-
       try {
+        // Inputs Validation
+        if (
+          isEmpty(trim(fname)) ||
+          isEmpty(trim(email)) ||
+          isEmpty(trim(lname)) ||
+          isEmpty(trim(password))
+        ) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message: 'Important credentials should not be empty'
+            }
+          }
+        }
+
+        // Email format Validation
+        if (!isEmail(email) || email.length > 250) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message: 'Email is not valid'
+            }
+          }
+        }
+
+        // Firstname must contains only ENG or THA alphabets
+        // and must be only 1 - 50 characters
+        if (!ENG_THA_NUM_ALPHA.test(fname) || fname.length > 50) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message: 'Firstname is not valid'
+            }
+          }
+        }
+
+        // Lastname must contains only ENG or THA alphabets
+        // and must be only 1 - 50 characters
+        if (!ENG_THA_NUM_ALPHA.test(lname) || lname.length > 50) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message: 'Lastname is not valid'
+            }
+          }
+        }
+
+        // Password may contain anything and must have
+        // a length between 8 - 250 characters
+        if (!PASSWORD_PATTERN.test(password) || password.length > 250) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message: 'Password is not valid'
+            }
+          }
+        }
+
+        // Password Validation
+        if (password.length < 8) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message:
+                'Password is too weak, must be >= 8, but <= 250 characters'
+            }
+          }
+        }
+
         // Checking wether user is already exists
         const ifUserAlreadyExist = await models.User.findOne({ email })
 
@@ -216,45 +217,45 @@ export default {
      * @return GraphQL LoginResponse Type
      */
     login: async (_, { email, password }, { models }) => {
-      // Inputs Validation
-      if (isEmpty(trim(email)) || isEmpty(trim(password))) {
-        return {
-          success: false,
-          token: '',
-          user: null,
-          err: {
-            name: 'login',
-            message: 'Email or Password not specified'
-          }
-        }
-      }
-
-      if (!isEmail(email) || email.length > 250) {
-        return {
-          success: false,
-          token: '',
-          user: null,
-          err: {
-            name: 'login',
-            message: 'Email is not valid'
-          }
-        }
-      }
-
-      // Password may contain anything and must have
-      // a length between 8 - 250 characters
-      if (!PASSWORD_PATTERN.test(password) || password.length > 250) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'login',
-            message: 'Password is not valid'
-          }
-        }
-      }
-
       try {
+        // Inputs Validation
+        if (isEmpty(trim(email)) || isEmpty(trim(password))) {
+          return {
+            success: false,
+            token: '',
+            user: null,
+            err: {
+              name: 'login',
+              message: 'Email or Password not specified'
+            }
+          }
+        }
+
+        if (!isEmail(email) || email.length > 250) {
+          return {
+            success: false,
+            token: '',
+            user: null,
+            err: {
+              name: 'login',
+              message: 'Email is not valid'
+            }
+          }
+        }
+
+        // Password may contain anything and must have
+        // a length between 8 - 250 characters
+        if (!PASSWORD_PATTERN.test(password) || password.length > 250) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'login',
+              message: 'Password is not valid'
+            }
+          }
+        }
+
         const user = await models.User.findOne({ email })
 
         if (!user) {
