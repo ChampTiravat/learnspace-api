@@ -12,8 +12,12 @@ import cors from 'cors'
 import http from 'http'
 import path from 'path'
 
-import { APP_SERVING_PATH, APP_PORT } from './config/application-config'
 import { DB_CONNECTION_STRING } from './config/database-config'
+import {
+  APP_SERVING_PATH,
+  APP_PORT,
+  APP_HOST
+} from './config/application-config'
 
 import extractUserFromToken from './middlewares/extractUserFromToken'
 import models from './models'
@@ -78,7 +82,7 @@ const subscriptionConfig = {
 }
 
 // Startint the server
-server.listen(APP_PORT, err => {
+server.listen(APP_PORT, APP_HOST, err => {
   if (err) throw err
   console.log(`Server started at ${APP_SERVING_PATH}`)
   new SubscriptionServer(subscriptionMetaData, subscriptionConfig)

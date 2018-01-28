@@ -1,0 +1,16 @@
+version: "3"
+services:
+
+  node-api:
+    build: "."
+    image: "node:8.9.1-alpine"
+    ports:
+      - "5000:5000"
+    links:
+      - mongodb
+    working_dir: '/learnspace'
+    command: "npm run dev-server" 
+
+  mongodb:
+    image: mongo
+  

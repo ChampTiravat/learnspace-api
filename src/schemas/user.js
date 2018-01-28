@@ -9,7 +9,6 @@ export default `
     address: String
     career: String
     profilePicture: String!
-    classrooms: [Classroom]!
   }
 
   type UserProfileResponse {
@@ -55,7 +54,6 @@ export default `
       ): RegisterResponse!
 
       editProfile(
-        _id: String!,
         username: String,
         fname: String,
         lname: String,

@@ -1,13 +1,11 @@
+import { isEmail, isAlpha, isEmpty, trim, isMongoId } from 'validator'
 import bcrypt from 'bcrypt'
 
 import { generateToken } from '../helpers/security-helpers'
-
-const EMAIL_REGEX = /.+@([a-zA-Z0-9-]+)\.[a-zA-Z0-9-]+$/
-const USER_ID_REGEX = /^([0-9a-f]{24})$/i
-const USERNAME_REGEX = /[a-zA-Z0-9_]+/
-const TEXT_REGEX = /^([\w]*)$/u
-const NAME_REGEX = /([\w]*)/u
-const PASSWORD_REGEX = /.*/
+import {
+  ENG_THA_NUM_ALPHA,
+  PASSWORD_PATTERN
+} from '../constants/regex-patterns'
 
 export default {
   Query: {
@@ -16,30 +14,25 @@ export default {
      * @type resolver
      * @desc Query information about a specific user corresponding to a given ID
      * @param parent : default parameter from ApolloServer
-     * @param { _id } : User ID(from MongoDB ObjectID)
-     * @param { models } : Mongoose Model
-     * @return Object : GraphQL User Type
+     * @param { _id } [GRAPHQL_ARGS] : User ID(from MongoDB ObjectID)
+     * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
+     * @return Object : GraphQL UserProfileResponse Type
      */
     userProfile: async (_, { _id }, { models }) => {
-      // Input Validation
-      if (!_id || _id == '' || !USER_ID_REGEX.test(_id)) {
-        return {
-          user: null,
-          err: {
-            name: 'user',
-            message: 'User ID invalid or not specified'
+      try {
+        // Input Validation
+        if (isEmpty(trim(_id)) || !isMongoId(_id)) {
+          return {
+            user: null,
+            err: {
+              name: 'user',
+              message: 'User ID invalid or not specified'
+            }
           }
         }
-      }
 
-      try {
         // Querying user
         const user = await models.User.findOne({ _id })
-
-        // Querying user's classrooms
-        const userClassrooms = await models.Classroom.find({
-          creator: user._id
-        })
 
         if (!user) {
           return {
@@ -60,7 +53,6 @@ export default {
             career: user.career,
             address: user.address,
             username: user.username,
-            classrooms: userClassrooms,
             profilePicture: user.profilePicture
           },
           err: null
@@ -75,97 +67,104 @@ export default {
         }
       }
     }
-  },
+  }, // End Query
   Mutation: {
     /**
      * @name register()
      * @type resolver
      * @desc Create a new user with a given information
      * @param parent : default parameter from ApolloServer
-     * @param { fname } : User's firstname
-     * @param { lname } : User's lastname(Not required)
-     * @param { email } : User's email
-     * @param { password } : User's password(Must be at least >= 8 chars)
-     * @param { models } : Mongoose Model
-     * @return Object : GraphQL User Type
+     * @param { fname } [GRAPHQL_ARGS] : User's firstname
+     * @param { lname } [GRAPHQL_ARGS] : User's lastname(Not required)
+     * @param { email } [GRAPHQL_ARGS] : User's email
+     * @param { password } [GRAPHQL_ARGS] : User's password(Must be at least >= 8 chars)
+     * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
+     * @return Object : GraphQL RegisterResponse Type
      */
     register: async (_, { fname, lname, email, password }, { models }) => {
-      // Inputs Validation
-      if (
-        fname.length === 0 ||
-        email.length === 0 ||
-        password.length === 0 ||
-        lname.length === 0
-      ) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message:
-              'Important credentials should not be empty. Please provide all important credentials'
-          }
-        }
-      }
-
-      // Email format Validation
-      if (!EMAIL_REGEX.test(email)) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message: 'Email is not valid'
-          }
-        }
-      }
-
-      if (!NAME_REGEX.test(fname)) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message: 'Firstname is not valid'
-          }
-        }
-      }
-
-      if (!NAME_REGEX.test(lname)) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message: 'Lastname is not valid'
-          }
-        }
-      }
-
-      if (!PASSWORD_REGEX.test(password)) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message: 'Password is not valid'
-          }
-        }
-      }
-
-      // Password Validation
-      if (password.length < 8) {
-        return {
-          success: false,
-          user: null,
-          err: {
-            name: 'register',
-            message: 'Password is too weak, must be at least >= 8 characters'
-          }
-        }
-      }
-
       try {
+        // Inputs Validation
+        if (
+          isEmpty(trim(fname)) ||
+          isEmpty(trim(email)) ||
+          isEmpty(trim(lname)) ||
+          isEmpty(trim(password))
+        ) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message: 'Important credentials should not be empty'
+            }
+          }
+        }
+
+        // Email format Validation
+        if (!isEmail(email) || email.length > 250) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message: 'Email is not valid'
+            }
+          }
+        }
+
+        // Firstname must contains only ENG or THA alphabets
+        // and must be only 1 - 50 characters
+        if (!ENG_THA_NUM_ALPHA.test(fname) || fname.length > 50) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message: 'Firstname is not valid'
+            }
+          }
+        }
+
+        // Lastname must contains only ENG or THA alphabets
+        // and must be only 1 - 50 characters
+        if (!ENG_THA_NUM_ALPHA.test(lname) || lname.length > 50) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message: 'Lastname is not valid'
+            }
+          }
+        }
+
+        // Password may contain anything and must have
+        // a length between 8 - 250 characters
+        if (!PASSWORD_PATTERN.test(password) || password.length > 250) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message: 'Password is not valid'
+            }
+          }
+        }
+
+        // Password Validation
+        if (password.length < 8) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message:
+                'Password is too weak, must be >= 8, but <= 250 characters'
+            }
+          }
+        }
+
+        // Checking wether user is already exists
         const ifUserAlreadyExist = await models.User.findOne({ email })
 
         // User email must be unique
@@ -186,9 +185,9 @@ export default {
 
         // Saving new user
         const user = await models.User.create({
-          fname,
-          lname,
-          email,
+          fname: fname,
+          lname: lname,
+          email: email,
           password: hashedPassword
         })
 
@@ -212,38 +211,51 @@ export default {
      * @type resolver
      * @desc Authenticate user by verifying their email nad password
      * @param parent : default parameter from ApolloServer
-     * @param { email } : User email
-     * @param { password } : User password
-     * @param { models } : Mongoose Model
+     * @param { email } [GRAPHQL_ARGS] : User email
+     * @param { password } [GRAPHQL_ARGS] : User password
+     * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return GraphQL LoginResponse Type
      */
     login: async (_, { email, password }, { models }) => {
-      // Inputs Validation
-      if (!email || email == '' || !password || password == '') {
-        return {
-          success: false,
-          token: '',
-          user: null,
-          err: {
-            name: 'login',
-            message: 'Email or Password not specified'
-          }
-        }
-      }
-
-      if (!EMAIL_REGEX.test(email)) {
-        return {
-          success: false,
-          token: '',
-          user: null,
-          err: {
-            name: 'login',
-            message: 'Email is not valid'
-          }
-        }
-      }
-
       try {
+        // Inputs Validation
+        if (isEmpty(trim(email)) || isEmpty(trim(password))) {
+          return {
+            success: false,
+            token: '',
+            user: null,
+            err: {
+              name: 'login',
+              message: 'Email or Password not specified'
+            }
+          }
+        }
+
+        if (!isEmail(email) || email.length > 250) {
+          return {
+            success: false,
+            token: '',
+            user: null,
+            err: {
+              name: 'login',
+              message: 'Email is not valid'
+            }
+          }
+        }
+
+        // Password may contain anything and must have
+        // a length between 8 - 250 characters
+        if (!PASSWORD_PATTERN.test(password) || password.length > 250) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'login',
+              message: 'Password is not valid'
+            }
+          }
+        }
+
         const user = await models.User.findOne({ email })
 
         if (!user) {
@@ -254,7 +266,7 @@ export default {
             user: null,
             err: {
               name: 'login',
-              message: 'User not found'
+              message: 'Invalid Credentials'
             }
           }
         }
@@ -291,7 +303,7 @@ export default {
             user: null,
             err: {
               name: 'login',
-              message: 'Wrong Password'
+              message: 'Invalid Credentials'
             }
           }
         }
@@ -312,115 +324,22 @@ export default {
      * @type resolver
      * @desc Edit user's profile information
      * @param parent : default parameter from ApolloServer
-     * @param { _id } : User ID
-     * @param { username } : New username
-     * @param { fname } : User new firstname
-     * @param { lname } : User new lastname
-     * @param { career } : User new career
-     * @param { address } : User new address
-     * @param { models } : Mongoose Model
+     * @param { username } [GRAPHQL_ARGS] : New username
+     * @param { fname } [GRAPHQL_ARGS] : User new firstname
+     * @param { lname } [GRAPHQL_ARGS] : User new lastname
+     * @param { career } [GRAPHQL_ARGS] : User new career
+     * @param { address } [GRAPHQL_ARGS] : User new address
+     * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
+     * @param { user } [GRAPHQL_CONTEXT] : Current authenticated user
      * @return GraphQL EditProfileResponse Type
      */
     editProfile: async (
       _,
-      { _id, username, fname, lname, career, address },
+      { username, fname, lname, career, address },
       { models }
     ) => {
-      const fieldsToUpdate = [username, fname, lname, career, address].filter(
-        input => !!input
-      )
-
-      // Validation
-      if (!_id || _id == '') {
-        return {
-          success: false,
-          err: {
-            name: 'editProfile',
-            message: "Error 'ID' not specified"
-          }
-        }
-      }
-
-      if (!USER_ID_REGEX.test(_id)) {
-        return {
-          success: false,
-          err: {
-            name: 'editProfile',
-            message: 'User ID not valid or not specified'
-          }
-        }
-      }
-
-      if (username & !USERNAME_REGEX.test(username)) {
-        return {
-          success: false,
-          err: {
-            name: 'editProfile',
-            message: 'Username is not valid'
-          }
-        }
-      }
-
-      if (fname & !NAME_REGEX.test(fname)) {
-        return {
-          success: false,
-          err: {
-            name: 'editProfile',
-            message: 'Firstname is not valid'
-          }
-        }
-      }
-
-      if (lname & !NAME_REGEX.test(lname)) {
-        return {
-          success: false,
-          err: {
-            name: 'editProfile',
-            message: 'Lastname is not valid'
-          }
-        }
-      }
-
-      if (career & !TEXT_REGEX.test(career)) {
-        return {
-          success: false,
-          err: {
-            name: 'editProfile',
-            message: 'Career is not valid'
-          }
-        }
-      }
-
-      if (address & !TEXT_REGEX.test(address)) {
-        return {
-          success: false,
-          err: {
-            name: 'editProfile',
-            message: 'Address is not valid'
-          }
-        }
-      }
-
       try {
-        // Update user info
-        const result = await models.User.findOneAndUpdate(
-          { _id },
-          { ...fieldsToUpdate }
-        )
-
-        return {
-          success: true,
-          err: null
-        }
-      } catch (err) {
-        return {
-          success: false,
-          err: {
-            name: 'editProfile',
-            message: 'Server Error'
-          }
-        }
-      }
+      } catch (err) {}
     }
-  }
+  } // End Mutation
 }
