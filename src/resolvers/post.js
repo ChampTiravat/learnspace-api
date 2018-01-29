@@ -1,4 +1,4 @@
-import { isAlpha, isEmpty, trim, isMongoId } from 'validator'
+import { isEmpty, trim, isMongoId, equals } from 'validator'
 
 import { ENG_THA_NUM_ALPHA } from '../constants/regex-patterns'
 
@@ -145,7 +145,7 @@ export default {
         }
 
         // Checking the current user is classroom supervisor(creator)
-        if (targetClassroom.creator !== user._id) {
+        if (!equals(user._id, String(targetClassroom.creator))) {
           return {
             success: false,
             post: null,
