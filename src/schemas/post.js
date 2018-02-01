@@ -20,7 +20,13 @@ export default `
         err: Error 
     }
 
+    type GetPostResponse {
+        post: Post
+        err: Error
+    }
+
     type Query {
+        getPost(_id: String!): GetPostResponse!
         classroomPosts(_id: String!): ClassroomPostsResponse!
     }
 
