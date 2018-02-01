@@ -72,6 +72,11 @@ export default {
           _id: classroom.creator
         })
 
+        // Querying posts related to a given classroom
+        const classroomPosts = await models.Post.find({
+          classroom: classroom._id
+        })
+
         if (!classroom) {
           return {
             classroom: null,
@@ -111,30 +116,7 @@ export default {
               { title: 'Final Project', passed: false },
               { title: 'Examination', passed: false }
             ],
-            posts: [
-              {
-                _id: '123235',
-                title:
-                  'Advance Introduction to JVM Execution Processes on x64 Architecture'
-              },
-              {
-                _id: '123237',
-                title:
-                  'เริ่มต้นการเขียนโปรแกรมควบคุมระบบเซ็นเซอร์ตรวจจับการเคลื่อนใหวด้วยภาษา C++ และ Linux'
-              },
-              {
-                _id: '123238',
-                title: 'Introduction to JVM'
-              },
-              {
-                _id: '123239',
-                title: 'Introduction to JVM'
-              },
-              {
-                _id: '12323111',
-                title: 'Introduction to JVM'
-              }
-            ]
+            posts: classroomPosts
           },
           err: null
         }
