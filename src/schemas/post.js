@@ -5,7 +5,7 @@ export default `
         title: String!
         creator: User!
         recipe: String!
-        comments: [String]!
+        comments: [Comment]!
         isPublic: Boolean!
     }
 
