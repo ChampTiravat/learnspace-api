@@ -3,16 +3,6 @@ import jwt from 'jsonwebtoken'
 import { SECRET_TOKEN_KEY } from '../config/security-config'
 
 /**
- * @name requiredAuthentication()
- * @desc Verify that the user is already authenticated
- * @param
- * @return
- */
-export const requiredAuthentication = () => {
-  // Do something
-}
-
-/**
  * @name verifyToken()
  * @desc Verifying wether the given token is valid or not
  * @param token string : A token to verify
