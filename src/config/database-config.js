@@ -11,3 +11,6 @@ export const DB_NAME =
     : process.env.DB_DEV_NAME
 
 export const DB_CONNECTION_STRING = `mongodb://${DB_HOST}:${DB_PORT}/${DB_NAME}`
+
+export const REDIS_HOST = process.env.REDIS_HOST
+export const REDIS_PORT = process.env.REDIS_PORT
