@@ -269,7 +269,7 @@ export default {
         }
 
         // Current user must be the creator of the post(classroom supervisor)
-        if (user._id !== postToRemove.creator) {
+        if (!equals(user._id, String(postToRemove.creator))) {
           return {
             success: false,
             err: {
