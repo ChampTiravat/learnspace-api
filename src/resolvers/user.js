@@ -1,4 +1,4 @@
-import { isEmail, isAlpha, isEmpty, trim, isMongoId } from 'validator'
+import { isEmail, isEmpty, trim, isMongoId } from 'validator'
 import bcrypt from 'bcrypt'
 
 import { generateToken } from '../helpers/security-helpers'
@@ -139,8 +139,8 @@ export default {
         }
 
         // Password may contain anything and must have
-        // a length between 8 - 250 characters
-        if (!PASSWORD_PATTERN.test(password) || password.length > 250) {
+        // a length between 8 - 55 characters
+        if (!PASSWORD_PATTERN.test(password) || password.length > 55) {
           return {
             success: false,
             user: null,
@@ -185,9 +185,9 @@ export default {
 
         // Saving new user
         const user = await models.User.create({
-          fname: fname,
-          lname: lname,
-          email: email,
+          fname,
+          lname,
+          email,
           password: hashedPassword
         })
 
@@ -222,8 +222,8 @@ export default {
         if (isEmpty(trim(email)) || isEmpty(trim(password))) {
           return {
             success: false,
-            token: '',
             user: null,
+            token: '',
             err: {
               name: 'login',
               message: 'Email or Password not specified'
@@ -244,8 +244,8 @@ export default {
         }
 
         // Password may contain anything and must have
-        // a length between 8 - 250 characters
-        if (!PASSWORD_PATTERN.test(password) || password.length > 250) {
+        // a length between 8 - 55 characters
+        if (!PASSWORD_PATTERN.test(password) || password.length > 55) {
           return {
             success: false,
             user: null,
@@ -299,8 +299,8 @@ export default {
           // Invalid Password
           return {
             success: false,
-            token: '',
             user: null,
+            token: '',
             err: {
               name: 'login',
               message: 'Invalid Credentials'
@@ -310,8 +310,8 @@ export default {
       } catch (err) {
         return {
           success: false,
-          token: '',
           user: null,
+          token: '',
           err: {
             name: 'login',
             message: 'Server Error'
