@@ -25,6 +25,11 @@ export default `
         err: Error
     }
 
+    type RemovePostResponse {
+        success: Boolean!
+        err: Error
+    }
+
     type Query {
         getPost(_id: String!): GetPostResponse!
         classroomPosts(_id: String!): ClassroomPostsResponse!
@@ -32,6 +37,7 @@ export default `
 
     type Mutation {
         createPost(classroomID: String!, title: String!, recipe: String!, isPublic: Boolean!): CreatePostResponse!
+        removePost(postID: String!): RemovePostResponse!
     }
 
 `
