@@ -8,9 +8,14 @@ services:
       - "5000:5000"
     links:
       - mongodb
+      - redis
     working_dir: '/learnspace'
     command: "npm run dev-server" 
 
   mongodb:
     image: mongo
   
+  
+  redis:
+    image: redis
+
