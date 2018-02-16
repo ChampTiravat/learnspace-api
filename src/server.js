@@ -21,6 +21,11 @@ import {
   APP_PORT,
   APP_HOST
 } from './config/application-config'
+import {
+  SUBSCRIPTION_ENDPOINT,
+  GRAPHIQL_ENDPOINT,
+  GRAPHQL_ENDPOINT,
+} from './config/graphql-config'
 
 // Helpers
 import extractUserFromToken from './middlewares/extractUserFromToken'
@@ -62,11 +67,11 @@ const schema = makeExecutableSchema({
 
 // GraphQL Entry Point
 app.use(
-  '/graphql',
+  GRAPHQL_ENDPOINT,
   bodyParser.json(),
   graphqlExpress(req => ({
     schema,
-    debug: process.env.NODE_ENV === 'development' ? true : false,
+    debug: !!process.env.NODE_ENV === 'development',
     context: {
       user: req.user,
       redisClient,
@@ -77,10 +82,10 @@ app.use(
 
 // GraphiQL Entry Point
 app.use(
-  '/graphiql',
+  GRAPHIQL_ENDPOINT,
   bodyParser.json(),
   graphiqlExpress({
-    endpointURL: '/graphql'
+    endpointURL: GRAPHQL_ENDPOINT
   })
 )
 
@@ -97,7 +102,7 @@ server.listen(APP_PORT, APP_HOST, err => {
 
   const subscriptionConfig = {
     server,
-    path: '/subscriptions'
+    path: SUBSCRIPTION_ENDPOINT 
   }
 
   new SubscriptionServer(subscriptionMetaData, subscriptionConfig)
