@@ -3,18 +3,17 @@ services:
 
   node-api:
     build: "."
-    image: "node:8.9.1-alpine"
     ports:
       - "5000:5000"
     links:
       - mongodb
       - redis
     working_dir: '/learnspace'
-    command: "npm run dev-server" 
+    volumes:
+      - "/home/ghost/Desktop/projects/nodejs/learnspace-api:/learnspace"
 
   mongodb:
     image: mongo
-  
   
   redis:
     image: redis
