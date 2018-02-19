@@ -1,48 +1,43 @@
-import jwt from "jsonwebtoken";
+import jwt from 'jsonwebtoken'
+import { isMongoId } from 'validator'
 
-import { SECRET_TOKEN_KEY } from "../config/security-config";
+import { SECRET_TOKEN_KEY } from '../config/security-config'
 
 /** ==================================================================================
  * @name requiredAuthentication()
- * @desc A resolver acts as a middleware between a real resolver wich intended to be execute.
- *       The purpose of this, is to make sure user have the right permission to access the
+ * @desc Make sure user have the right permission to access the
  *       particular resource, by verifying their authentication status
- * @param { user } [GRAPHQL_CONTEXT] : Current authenticated user
+ * @param { user } [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in
  ================================================================================== */
-export const requiredAuthentication = async (parent, args, { user }) => {
-  try {
-    // A middleware with a specific permission
-    const middlewareResolver = {
-      /**
-       * @name mustBeLoggedIn()
-       * @desc User must be authenticated(must be logged-in)
-       */
-      mustBeLoggedIn: resolver => {
-        if (!user || user == null || !user._id) {
-          throw new Error("Not authenticated");
-        }
-        return resolver;
-      },
-      /**
-       * @name mustBeClassroomAdmin()
-       * @desc User must be authenticated and must be a classroom member(must be logged-in)
-       */
-      mustBeClassroomAdmin: resolver => {
-        // Make sure user is an admin of a particular classroom
-      }
-    };
-
-    return middlewareResolver;
-  } catch (err) {
-    // User doesn't meet the minimum authorization requirement
+export const requiredAuthentication = async user => {
+  if (!user || user == null || !isMongoId(String(user._id))) {
     return {
-      err: {
-        name: "authentication",
-        message: "No Authorized Access"
-      }
-    };
+      err: { message: 'Not Authorized Access' }
+    }
   }
-};
+}
+
+/** ==================================================================================
+ * @name requireClassroomMember()
+ * @desc Make sure user have the right permission to access the
+ *       particular resource, by Making sure they are classroom member
+ * @param { classroomID } [GRAPHQL_ARGS] : Classroom ID
+ * @param { Classroom } [GRAPHQL_CONTEXT] : Mongoose Model names "Classroom"
+ * @param { user } [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in
+ ================================================================================== */
+export const requireClassroomMember = async (classroomID, Classroom, user) => {
+  // Make sure user is already authenticated
+  await requiredAuthentication(user)
+
+  // In case the classroom ID was not provided. This means something went wrong
+  if (isEmpty(trim(_id)) || !isMongoId(_id)) {
+    return { err: { message: 'Not Authorized Access' } }
+  }
+
+  // Checking wether user is a member of the given classroom or not
+  // IF NOT isClassroomMember DO
+  //    RETURN message "Not Authorized Access"
+}
 
 /** ==================================================================================
  * @name verifyToken()
@@ -51,17 +46,18 @@ export const requiredAuthentication = async (parent, args, { user }) => {
  * @return Object(an extracted data from the given token)
  ================================================================================== */
 export const verifyToken = async token => {
-  if (!token || token === "")
-    throw new Error("ERROR: 1st parameter 'token' not specified!");
-
-  const extractedData = await jwt.verify(token, SECRET_TOKEN_KEY);
-
-  if (!extractedData) {
-    throw new Error("ERROR: Token Invalid!");
+  if (!token || token === '') {
+    throw new Error("ERROR: 1st parameter 'token' not specified!")
   }
 
-  return extractedData;
-};
+  const extractedData = await jwt.verify(token, SECRET_TOKEN_KEY)
+
+  if (!extractedData) {
+    throw new Error('ERROR: Token Invalid!')
+  }
+
+  return extractedData
+}
 
 /** ==================================================================================
  * @name generateToken()
@@ -72,24 +68,24 @@ export const verifyToken = async token => {
  * @return string : a generated token
  ================================================================================== */
 export const generateToken = async (payload, type) => {
-  let token = "";
+  let token = ''
 
   if (!payload || payload == null)
-    throw new Error("ERROR: 1st parameter 'payload' not specified!");
+    throw new Error("ERROR: 1st parameter 'payload' not specified!")
 
-  if (!type || type === "")
-    throw new Error("ERROR: 2nd parameter 'type' not specified!");
+  if (!type || type === '')
+    throw new Error("ERROR: 2nd parameter 'type' not specified!")
 
-  if (type === "accessToken") {
+  if (type === 'accessToken') {
     token = await jwt.sign(payload, SECRET_TOKEN_KEY, {
       expiresIn: 60 * 10 // Last for 10 minutes
-    });
-  } else if (type === "refreshToken") {
-    token = await jwt.sign(payload, SECRET_TOKEN_KEY); // This token will last forever
+    })
+  } else if (type === 'refreshToken') {
+    token = await jwt.sign(payload, SECRET_TOKEN_KEY) // This token will last forever
   }
 
-  return token;
-};
+  return token
+}
 
 /** ==================================================================================
  * @name generateNewTokensIfExpired()
@@ -99,10 +95,10 @@ export const generateToken = async (payload, type) => {
  ================================================================================== */
 export const generateNewTokensIfExpired = async payload => {
   if (!payload || payload == null)
-    throw new Error("ERROR: 1st parameter 'refreshToken' not specified!");
+    throw new Error("ERROR: 1st parameter 'refreshToken' not specified!")
 
-  const newRefreshToken = await generateToken(payload, "refreshToken");
-  const newAccessToken = await generateToken(payload, "accessToken");
+  const newRefreshToken = await generateToken(payload, 'refreshToken')
+  const newAccessToken = await generateToken(payload, 'accessToken')
 
-  return { newRefreshToken, newAccessToken };
-};
+  return { newRefreshToken, newAccessToken }
+}
