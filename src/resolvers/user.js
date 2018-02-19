@@ -5,6 +5,7 @@ import {
   requiredAuthentication,
   generateToken
 } from '../helpers/security-helpers'
+
 import {
   ENG_THA_NUM_ALPHA,
   PASSWORD_PATTERN
@@ -18,60 +19,62 @@ export default {
      * @desc Query information about a specific user corresponding to a given ID
      * @param parent : default parameter from ApolloServer
      * @param { _id } [GRAPHQL_ARGS] : User ID(from MongoDB ObjectID)
+     * @param { user } [GRAPHQL_CONTEXT] : Current authenticated user
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return Object : GraphQL UserProfileResponse Type
      ================================================================================== */
-    userProfile: requiredAuthentication.mustBeLoggedIn(
-      async (_, { _id }, { models }) => {
-        try {
-          // Input Validation
-          if (isEmpty(trim(_id)) || !isMongoId(_id)) {
-            return {
-              user: null,
-              err: {
-                name: 'user',
-                message: 'User ID invalid or not specified'
-              }
-            }
-          }
+    userProfile: async (_, { _id }, { models, user }) => {
+      try {
+        // Authentication : user must be logged-in
+        await requiredAuthentication(user)
 
-          // Querying user
-          const user = await models.User.findOne({ _id })
-
-          if (!user) {
-            return {
-              user: null,
-              err: {
-                name: 'user',
-                message: 'User not found'
-              }
-            }
-          }
-
-          return {
-            user: {
-              _id: user._id,
-              email: user.email,
-              fname: user.fname,
-              lname: user.lname,
-              career: user.career,
-              address: user.address,
-              username: user.username,
-              profilePicture: user.profilePicture
-            },
-            err: null
-          }
-        } catch (err) {
+        // Input Validation
+        if (isEmpty(trim(_id)) || !isMongoId(_id)) {
           return {
             user: null,
             err: {
               name: 'user',
-              message: 'Server Error'
+              message: 'User ID invalid or not specified'
             }
           }
         }
+
+        // Querying user
+        const user = await models.User.findOne({ _id })
+
+        if (!user) {
+          return {
+            user: null,
+            err: {
+              name: 'user',
+              message: 'User not found'
+            }
+          }
+        }
+
+        return {
+          user: {
+            _id: user._id,
+            email: user.email,
+            fname: user.fname,
+            lname: user.lname,
+            career: user.career,
+            address: user.address,
+            username: user.username,
+            profilePicture: user.profilePicture
+          },
+          err: null
+        }
+      } catch (err) {
+        return {
+          user: null,
+          err: {
+            name: 'user',
+            message: 'Server Error'
+          }
+        }
       }
-    )
+    }
   }, // End Query
   Mutation: {
     /** ==================================================================================
@@ -334,8 +337,8 @@ export default {
      * @param { lname } [GRAPHQL_ARGS] : User new lastname
      * @param { career } [GRAPHQL_ARGS] : User new career
      * @param { address } [GRAPHQL_ARGS] : User new address
-     * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @param { user } [GRAPHQL_CONTEXT] : Current authenticated user
+     * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return GraphQL EditProfileResponse Type
      ================================================================================== */
     editProfile: async (
@@ -344,6 +347,8 @@ export default {
       { models }
     ) => {
       try {
+        // Authentication : user must be logged-in
+        await requiredAuthentication(user)
       } catch (err) {}
     }
   } // End Mutation
