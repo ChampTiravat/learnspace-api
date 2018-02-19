@@ -1,7 +1,10 @@
 import { isEmail, isEmpty, trim, isMongoId } from 'validator'
 import bcrypt from 'bcrypt'
 
-import { generateToken } from '../helpers/security-helpers'
+import {
+  requiredAuthentication,
+  generateToken
+} from '../helpers/security-helpers'
 import {
   ENG_THA_NUM_ALPHA,
   PASSWORD_PATTERN
@@ -9,7 +12,7 @@ import {
 
 export default {
   Query: {
-    /**
+    /** ==================================================================================
      * @name userProfile()
      * @type resolver
      * @desc Query information about a specific user corresponding to a given ID
@@ -17,59 +20,61 @@ export default {
      * @param { _id } [GRAPHQL_ARGS] : User ID(from MongoDB ObjectID)
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return Object : GraphQL UserProfileResponse Type
-     */
-    userProfile: async (_, { _id }, { models }) => {
-      try {
-        // Input Validation
-        if (isEmpty(trim(_id)) || !isMongoId(_id)) {
+     ================================================================================== */
+    userProfile: requiredAuthentication.mustBeLoggedIn(
+      async (_, { _id }, { models }) => {
+        try {
+          // Input Validation
+          if (isEmpty(trim(_id)) || !isMongoId(_id)) {
+            return {
+              user: null,
+              err: {
+                name: 'user',
+                message: 'User ID invalid or not specified'
+              }
+            }
+          }
+
+          // Querying user
+          const user = await models.User.findOne({ _id })
+
+          if (!user) {
+            return {
+              user: null,
+              err: {
+                name: 'user',
+                message: 'User not found'
+              }
+            }
+          }
+
+          return {
+            user: {
+              _id: user._id,
+              email: user.email,
+              fname: user.fname,
+              lname: user.lname,
+              career: user.career,
+              address: user.address,
+              username: user.username,
+              profilePicture: user.profilePicture
+            },
+            err: null
+          }
+        } catch (err) {
           return {
             user: null,
             err: {
               name: 'user',
-              message: 'User ID invalid or not specified'
+              message: 'Server Error'
             }
-          }
-        }
-
-        // Querying user
-        const user = await models.User.findOne({ _id })
-
-        if (!user) {
-          return {
-            user: null,
-            err: {
-              name: 'user',
-              message: 'User not found'
-            }
-          }
-        }
-
-        return {
-          user: {
-            _id: user._id,
-            email: user.email,
-            fname: user.fname,
-            lname: user.lname,
-            career: user.career,
-            address: user.address,
-            username: user.username,
-            profilePicture: user.profilePicture
-          },
-          err: null
-        }
-      } catch (err) {
-        return {
-          user: null,
-          err: {
-            name: 'user',
-            message: 'Server Error'
           }
         }
       }
-    }
+    )
   }, // End Query
   Mutation: {
-    /**
+    /** ==================================================================================
      * @name register()
      * @type resolver
      * @desc Create a new user with a given information
@@ -80,7 +85,7 @@ export default {
      * @param { password } [GRAPHQL_ARGS] : User's password(Must be at least >= 8 chars)
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return Object : GraphQL RegisterResponse Type
-     */
+     ================================================================================== */
     register: async (_, { fname, lname, email, password }, { models }) => {
       try {
         // Inputs Validation
@@ -206,7 +211,7 @@ export default {
         }
       }
     },
-    /**
+    /** ==================================================================================
      * @name login()
      * @type resolver
      * @desc Authenticate user by verifying their email nad password
@@ -215,7 +220,7 @@ export default {
      * @param { password } [GRAPHQL_ARGS] : User password
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return GraphQL LoginResponse Type
-     */
+     ================================================================================== */
     login: async (_, { email, password }, { models }) => {
       try {
         // Inputs Validation
@@ -319,7 +324,7 @@ export default {
         }
       }
     },
-    /**
+    /** ==================================================================================
      * @name editProfile()
      * @type resolver
      * @desc Edit user's profile information
@@ -332,7 +337,7 @@ export default {
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @param { user } [GRAPHQL_CONTEXT] : Current authenticated user
      * @return GraphQL EditProfileResponse Type
-     */
+     ================================================================================== */
     editProfile: async (
       _,
       { username, fname, lname, career, address },
