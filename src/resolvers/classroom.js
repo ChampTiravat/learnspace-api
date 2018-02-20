@@ -1,10 +1,11 @@
 import { isAlpha, isEmpty, trim, isMongoId } from 'validator'
 
+import { requiredAuthentication } from '../helpers/security-helpers'
 import { ENG_THA_NUM_ALPHA } from '../constants/regex-patterns'
 
 export default {
   Query: {
-    /**
+    /** ==================================================================================
      * @name userClassrooms()
      * @type resolver
      * @desc Send the classrooms corresponding to a given user
@@ -12,7 +13,7 @@ export default {
      * @param { _id } [GRAPHQL_ARGS] : User ID
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return Object : GraphQL UserClassroomsResponse Type
-     */
+     ================================================================================== */
     userClassrooms: async (_, { _id }, { models }) => {
       try {
         // Input Validation
@@ -42,7 +43,7 @@ export default {
         }
       }
     },
-    /**
+    /** ==================================================================================
      * @name classroomProfile()
      * @type resolver
      * @desc Send classroom information corresponding to a given Classroom ID
@@ -50,7 +51,7 @@ export default {
      * @param { _id } [GRAPHQL_ARGS] : Classroom ID
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return Object : GraphQL
-     */
+     ================================================================================== */
     classroomProfile: async (_, { _id }, { models }) => {
       try {
         // Input Validation
@@ -132,7 +133,90 @@ export default {
     }
   }, // End Query
   Mutation: {
-    /**
+    /** ==================================================================================
+     * @name inviteUser()
+     * @type resolver
+     * @desc Send a classroom invitation to a given user
+     * @param parent : default parameter from ApolloServer
+     * @param {  } [GRAPHQL_ARGS] :
+     * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
+     * @param { user } [GRAPHQL_CONTEXT] : Current logged-in user(used as a classroom creator)
+     * @return Object : GraphQL CraeteClassroomResponse Type
+     ================================================================================== */
+    inviteUser: async (_, { candidateID, classroomID }, { models, user }) => {
+      try {
+        // 0) Make sure user has authorized access
+        await requiredAuthentication(user)
+
+        // 1) Validate inputs
+        if (isEmpty(trim(candidateID)) || !isMongoId(candidateID)) {
+          return {
+            success: false,
+            err: {
+              name: 'inviteUser',
+              message: 'Candidate ID invalid or not specified'
+            }
+          }
+        }
+
+        if (isEmpty(trim(classroomID)) || !isMongoId(classroomID)) {
+          return {
+            success: false,
+            err: {
+              name: 'inviteUser',
+              message: 'Classroom ID invalid or not specified'
+            }
+          }
+        }
+
+        // 2) Make sure a given classroom does exists
+        const classroom = await models.Classroom.findOne({ _id: classroomID })
+        if (!classroom) {
+          return {
+            success: false,
+            err: {
+              name: 'inviteUser',
+              message: 'A given classroom does not exists'
+            }
+          }
+        }
+
+        // 3) Make sure a candidate user does exists
+        const candidate = await models.User.findOne({ _id: candidateID })
+        if (!candidate) {
+          return {
+            success: false,
+            err: {
+              name: 'inviteUser',
+              message: 'A given candidate does not exists'
+            }
+          }
+        }
+
+        // 4) Insert Invitation into ClassroomInvitations Collections(in MongoDB)
+        await models.ClassroomInvitations.create({
+          candidate: candidateID,
+          classroom: classroomID
+        })
+
+        // 5) Send a notification to candidate user(if everything went ok)
+
+        // 6) Return appropriete GraphQL response
+        return {
+          success: true,
+          err: null
+        }
+      } catch (err) {
+        return {
+          success: false,
+          err: {
+            name: 'inviteUser',
+            message: 'Server Error'
+          }
+        }
+      }
+    },
+    /** ==================================================================================
      * @name createClassroom()
      * @type resolver
      * @desc Create a new classroom with a given information
@@ -143,7 +227,7 @@ export default {
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @param { user } [GRAPHQL_CONTEXT] : Current logged-in user(used as a classroom creator)
      * @return Object : GraphQL CraeteClassroomResponse Type
-     */
+     ================================================================================== */
     createClassroom: async (
       _,
       { name, description, subject },

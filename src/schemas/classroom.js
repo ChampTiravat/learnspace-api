@@ -34,17 +34,28 @@ export default `
     err: Error
   }
 
+  type InviteUserResponse {
+    success: Boolean!
+    err: Error
+  }
+
   type Query {
     classroomProfile(_id: String!): ClassroomProfileResponse!
     userClassrooms(_id: String!): UserClassroomsResponse!
   }
 
   type Mutation {
+
     createClassroom(
       name: String!,
       description: String!,
       subject: String!
     ) : CreateClassroomResponse!
+    
+    inviteUser(
+      candidateID: String!,
+      classroomID: String!
+    ) : InviteUserResponse!
   }
   
 `
