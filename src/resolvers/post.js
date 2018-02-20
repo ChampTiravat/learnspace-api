@@ -4,7 +4,7 @@ import { ENG_THA_NUM_ALPHA } from '../constants/regex-patterns'
 
 export default {
   Query: {
-    /**
+    /** ==================================================================================
      * @name classroomPosts()
      * @type resolver
      * @desc Return a list of post corresponding to a given classroom ID
@@ -12,7 +12,7 @@ export default {
      * @param { _id } [GRAPHQL_ARGS] : Classroom ID
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return Object : GraphQL ClassroomPostsResponse Type
-     */
+     ================================================================================== */
     classroomPosts: async (_, { _id }, { models }) => {
       try {
         // Input Validation
@@ -56,7 +56,7 @@ export default {
         }
       }
     },
-    /**
+    /** ==================================================================================
      * @name getPost()
      * @type resolver
      * @desc Return a post corresponding to a given post ID
@@ -64,7 +64,7 @@ export default {
      * @param { _id } [GRAPHQL_ARGS] : post ID
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return Object : GraphQL GetPostResponse Type
-     */
+     ================================================================================== */
     getPost: async (_, { _id }, { models }) => {
       try {
         // Input Validation
@@ -109,7 +109,7 @@ export default {
     }
   }, // End Query
   Mutation: {
-    /**
+    /** ==================================================================================
      * @name createPost()
      * @type resolver
      * @desc Create a new post
@@ -121,7 +121,7 @@ export default {
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @param { user } [GRAPHQL_CONTEXT] : Currnet logged-in user(extracted from JWT token)
      * @return Object : GraphQL CreatePostResponse Type
-     */
+     ================================================================================== */
     createPost: async (
       _,
       { classroomID, title, recipe, isPublic },
@@ -233,7 +233,7 @@ export default {
         }
       }
     },
-    /**
+    /** ==================================================================================
      * @name removePost()
      * @type resolver
      * @desc Remove an existing post
@@ -242,7 +242,7 @@ export default {
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @param { user } [GRAPHQL_CONTEXT] : Currnet logged-in user(extracted from JWT token)
      * @return Object : GraphQL RemovePostResponse Type
-     */
+     ================================================================================== */
     removePost: async (_, { postID }, { models, user }) => {
       try {
         // Input Validation
