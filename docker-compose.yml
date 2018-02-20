@@ -24,3 +24,7 @@ services:
   reverse-proxy:
     image: nginx:stable-alpine
     restart: always
+    links:
+      - node-api
+    ports:
+        - 9000:80
