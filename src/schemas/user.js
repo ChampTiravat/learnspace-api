@@ -5,7 +5,6 @@ export default `
     fname: String!
     email: String!
     lname: String
-    username: String
     address: String
     career: String
     profilePicture: String!
