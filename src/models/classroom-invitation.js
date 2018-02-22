@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose'
 
-const ClassroomInvitationsSchema = new Schema({
+const ClassroomInvitationSchema = new Schema({
   candidate: {
     type: Schema.Types.ObjectId,
     ref: 'User',
@@ -17,5 +17,5 @@ const ClassroomInvitationsSchema = new Schema({
 
 export default mongoose.model(
   'classroom_invitations',
-  ClassroomInvitationsSchema
+  ClassroomInvitationSchema
 )

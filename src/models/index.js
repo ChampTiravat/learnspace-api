@@ -1,3 +1,4 @@
+import ClassroomInvitation from './classroom-invitation'
 import Notification from './notification'
 import ChatMessage from './chat-message'
 import SubComment from './sub-comment'
@@ -12,6 +13,7 @@ import Post from './post'
 // directly through our resolver's context object, without
 // importing these models one by one
 const models = {
+  ClassroomInvitation,
   Notification,
   ChatMessage,
   SubComment,

@@ -194,7 +194,7 @@ export default {
         }
 
         // 4) Insert Invitation into ClassroomInvitations Collections(in MongoDB)
-        await models.ClassroomInvitations.create({
+        await models.ClassroomInvitation.create({
           candidate: candidateID,
           classroom: classroomID
         })
