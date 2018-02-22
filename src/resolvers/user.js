@@ -1,4 +1,4 @@
-import { isEmail, isEmpty, trim, isMongoId } from 'validator'
+import { isEmail, isEmpty, trim, isMongoId, isAlphanumeric } from 'validator'
 import bcrypt from 'bcrypt'
 
 import {
@@ -82,6 +82,7 @@ export default {
      * @type resolver
      * @desc Create a new user with a given information
      * @param parent : default parameter from ApolloServer
+     * @param { username } [GRAPHQL_ARGS] : User's username
      * @param { fname } [GRAPHQL_ARGS] : User's firstname
      * @param { lname } [GRAPHQL_ARGS] : User's lastname(Not required)
      * @param { email } [GRAPHQL_ARGS] : User's email
@@ -89,10 +90,15 @@ export default {
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @return Object : GraphQL RegisterResponse Type
      ================================================================================== */
-    register: async (_, { fname, lname, email, password }, { models }) => {
+    register: async (
+      _,
+      { fname, lname, email, password, username },
+      { models }
+    ) => {
       try {
         // Inputs Validation
         if (
+          isEmpty(trim(username)) ||
           isEmpty(trim(fname)) ||
           isEmpty(trim(email)) ||
           isEmpty(trim(lname)) ||
@@ -116,6 +122,19 @@ export default {
             err: {
               name: 'register',
               message: 'Email is not valid'
+            }
+          }
+        }
+
+        // Username must contains only ENG alphabets
+        // and must be only 1 - 30 characters
+        if (!isAlphanumeric(username) || username.length > 50) {
+          return {
+            success: false,
+            user: null,
+            err: {
+              name: 'register',
+              message: 'Username is not valid'
             }
           }
         }
@@ -193,6 +212,7 @@ export default {
 
         // Saving new user
         const user = await models.User.create({
+          username,
           fname,
           lname,
           email,
@@ -204,6 +224,7 @@ export default {
           user
         }
       } catch (err) {
+        console.log(err)
         return {
           success: false,
           user: null,

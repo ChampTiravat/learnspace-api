@@ -6,6 +6,7 @@ export default `
     email: String!
     lname: String
     address: String
+    username: String
     career: String
     profilePicture: String!
   }
@@ -48,6 +49,7 @@ export default `
       register(
         email: String!,
         password: String!,
+        username: String!,
         fname: String!,
         lname: String
       ): RegisterResponse!

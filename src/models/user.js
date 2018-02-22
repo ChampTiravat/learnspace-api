@@ -28,6 +28,7 @@ const UserSchema = new Schema({
     default: DEFAULT_USER_ROLE
   },
   lname: { type: String, lowercase: true, required: true },
+  username: { type: String, lowercase: true, unique: true, required: true },
   birthDate: Date,
   address: String,
   career: String,
