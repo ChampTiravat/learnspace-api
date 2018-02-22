@@ -1,5 +1,12 @@
-import { isEmail, isEmpty, trim, isMongoId, isAlphanumeric } from 'validator'
 import bcrypt from 'bcrypt'
+import {
+  equals,
+  isEmail,
+  isEmpty,
+  trim,
+  isMongoId,
+  isAlphanumeric
+} from 'validator'
 
 import {
   requiredAuthentication,
@@ -192,16 +199,33 @@ export default {
         }
 
         // Checking wether user is already exists
-        const ifUserAlreadyExist = await models.User.findOne({ email })
+        const userWithTheSameCreds = await models.User.findOne({
+          $or: [{ email: email }, { username: username }]
+        })
 
         // User email must be unique
-        if (ifUserAlreadyExist) {
-          return {
-            success: false,
-            user: null,
-            err: {
-              name: 'register',
-              message: 'User already exist with the given credentials'
+        if (userWithTheSameCreds) {
+          // Email conflict
+          if (equals(userWithTheSameCreds.email, email)) {
+            return {
+              success: false,
+              user: null,
+              err: {
+                name: 'register',
+                message: 'User already exist with the given email'
+              }
+            }
+          }
+
+          // Username conflict
+          if (equals(userWithTheSameCreds.username, username)) {
+            return {
+              success: false,
+              user: null,
+              err: {
+                name: 'register',
+                message: 'User already exist with the given username'
+              }
             }
           }
         }
