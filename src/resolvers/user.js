@@ -47,7 +47,10 @@ export default {
         }
 
         // Querying user
-        const user = await models.User.findOne({ _id })
+        const user = await models.User.findOne(
+          { _id },
+          '_id email fname lname career address username profilePicture'
+        )
 
         if (!user) {
           return {
@@ -60,16 +63,7 @@ export default {
         }
 
         return {
-          user: {
-            _id: user._id,
-            email: user.email,
-            fname: user.fname,
-            lname: user.lname,
-            career: user.career,
-            address: user.address,
-            username: user.username,
-            profilePicture: user.profilePicture
-          },
+          user,
           err: null
         }
       } catch (err) {
