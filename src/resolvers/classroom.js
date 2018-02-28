@@ -1,7 +1,10 @@
 import { isAlpha, isEmpty, trim, isMongoId } from 'validator'
 
-import { requiredAuthentication } from '../helpers/security-helpers'
 import { ENG_THA_NUM_ALPHA } from '../constants/regex-patterns'
+import {
+  requiredAuthentication,
+  mustBeClassroomCreator
+} from '../helpers/security-helpers'
 
 export default {
   Query: {
@@ -138,17 +141,19 @@ export default {
      * @type resolver
      * @desc Send a classroom invitation to a given user
      * @param parent : default parameter from ApolloServer
-     * @param {  } [GRAPHQL_ARGS] :
+     * @param { candidateID } [GRAPHQL_ARGS] : ID if the candidate(target user who recieve an invitation)
+     * @param { classroomID } [GRAPHQL_ARGS] : Classroom ID
      * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
      * @param { user } [GRAPHQL_CONTEXT] : Current logged-in user(used as a classroom creator)
      * @return Object : GraphQL CraeteClassroomResponse Type
      ================================================================================== */
     inviteUser: async (_, { candidateID, classroomID }, { models, user }) => {
       try {
-        // 0) Make sure user has authorized access
+        // Make sure user has authorized access
         await requiredAuthentication(user)
+        await mustBeClassroomCreator(user, classroomID)
 
-        // 1) Validate inputs
+        // Validate inputs
         if (isEmpty(trim(candidateID)) || !isMongoId(candidateID)) {
           return {
             success: false,
@@ -169,8 +174,10 @@ export default {
           }
         }
 
-        // 2) Make sure a given classroom does exists
-        const classroom = await models.Classroom.findOne({ _id: classroomID })
+        // Make sure a given classroom does exists
+        const targetClassroom = await models.Classroom.findOne({
+          _id: classroomID
+        })
         if (!classroom) {
           return {
             success: false,
@@ -181,7 +188,7 @@ export default {
           }
         }
 
-        // 3) Make sure a candidate user does exists
+        // Make sure a candidate user does exists
         const candidate = await models.User.findOne({ _id: candidateID })
         if (!candidate) {
           return {
@@ -193,15 +200,49 @@ export default {
           }
         }
 
-        // 4) Insert Invitation into ClassroomInvitations Collections(in MongoDB)
+        // Candidate must not already being a member of a target classroom
+        const memberWithSameCred = await targetClassroom.members.find(member =>
+          equals(member._id, candidateID)
+        )
+        if (memberWithSameCred) {
+          if (!memberWithSameCred) {
+            return {
+              success: false,
+              err: {
+                name: 'inviteUser',
+                message:
+                  'A given candidate is already a member of a given classroom'
+              }
+            }
+          }
+        }
+
+        // Do not send an invitation if it's already been sent
+        const invitationWithSameCred = await models.ClassroomInvitation.findOne(
+          {
+            candidate: candidateID,
+            classroom: classroomID
+          }
+        )
+        if (invitationWithSameCred) {
+          return {
+            success: false,
+            err: {
+              name: 'inviteUser',
+              message: 'A given candidate already recieve an invitation'
+            }
+          }
+        }
+
+        // Insert Invitation into ClassroomInvitations Collections(in MongoDB)
         await models.ClassroomInvitation.create({
           candidate: candidateID,
           classroom: classroomID
         })
 
-        // 5) Send a notification to candidate user(if everything went ok)
+        // Send a notification to candidate user(if everything went ok)
 
-        // 6) Return appropriete GraphQL response
+        // Return appropriete GraphQL response
         return {
           success: true,
           err: null
