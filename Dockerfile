@@ -1,6 +1,5 @@
-FROM node:8.9.4
-
+FROM node:8.10.0
 WORKDIR /learnspace
 COPY . /learnspace
 RUN yarn
-CMD ["npm", "run", "dev-server"]
+CMD ["yarn", "dev-server"]

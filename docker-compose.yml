@@ -2,7 +2,6 @@ version: "3"
 services:
 
   node-api:
-    restart: always
     build: "."
     ports:
       - "5000:5000"
@@ -11,20 +10,10 @@ services:
       - redis
     working_dir: '/learnspace'
     volumes:
-      - "~/Desktop/projects/nodejs/learnspace-api:/learnspace"
+      - ".:/learnspace"
 
   mongodb:
     image: mongo
-    restart: always
   
   redis:
     image: redis
-    restart: always
-
-  reverse-proxy:
-    image: nginx:stable-alpine
-    restart: always
-    links:
-      - node-api
-    ports:
-        - 9000:80
