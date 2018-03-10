@@ -24,7 +24,7 @@ import {
 import {
   SUBSCRIPTION_ENDPOINT,
   GRAPHIQL_ENDPOINT,
-  GRAPHQL_ENDPOINT,
+  GRAPHQL_ENDPOINT
 } from './config/graphql-config'
 
 // Helpers
@@ -102,7 +102,7 @@ server.listen(APP_PORT, APP_HOST, err => {
 
   const subscriptionConfig = {
     server,
-    path: SUBSCRIPTION_ENDPOINT 
+    path: SUBSCRIPTION_ENDPOINT
   }
 
   new SubscriptionServer(subscriptionMetaData, subscriptionConfig)
