@@ -8,9 +8,9 @@ services:
     links:
       - mongodb
       - redis
-    working_dir: '/learnspace'
     volumes:
-      - ".:/learnspace"
+      - "./src:/learnspace-api/src"
+      - "./__test__:/learnspace-api/__test__"
 
   mongodb:
     image: mongo
