@@ -23,12 +23,6 @@ const ClassroomSchema = new Schema({
     required: true
   },
   outline: [CourseOutlineSchema],
-  members: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'User'
-    }
-  ],
   posts: [
     {
       type: Schema.Types.ObjectId,
