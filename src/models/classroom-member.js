@@ -6,16 +6,14 @@ const ClassroomMemberSchema = new Schema({
     ref: 'User',
     required: true
   },
-  classroom: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'Classroom'
-    }
-  ],
+  classroom: {
+    type: Schema.Types.ObjectId,
+    ref: 'Classroom'
+  },
   role: {
-    type: [String],
+    type: String,
     required: true,
-    default: 'member'
+    default: 'member' // Possible values ['member', 'admin']
   },
   createdAt: { type: Date, default: Date.now() },
   updatedAt: { type: Date, default: Date.now() }
