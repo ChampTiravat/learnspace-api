@@ -1,5 +1,6 @@
 import { isEmpty, trim, isMongoId } from 'validator'
 
+import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
 import { ENG_THA_NUM_ALPHA } from '../../../constants/regex-patterns'
 
 /** ==================================================================================
@@ -83,6 +84,14 @@ export default async (_, { name, description, subject }, { user, models }) => {
       creator: user._id
     })
 
+    // Add user(current user who created the classroom above)
+    // as a member of the classroom
+    await models.ClassroomMember.create({
+      member: user._id,
+      classroom: newClassroom._id,
+      role: 'admin'
+    })
+
     return {
       success: true,
       classroomID: newClassroom._id,
@@ -90,6 +99,8 @@ export default async (_, { name, description, subject }, { user, models }) => {
     }
   } catch (err) {
     // Some Error Occured
+    displayErrMessageWhenDev(err)
+
     return {
       success: false,
       classroomID: '',
