@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { isMongoId } from 'validator'
+import { isMongoId, isEmpty, trim } from 'validator'
 
 import { SECRET_TOKEN_KEY } from '../config/security-config'
 
@@ -8,14 +8,10 @@ import { SECRET_TOKEN_KEY } from '../config/security-config'
  * @desc Make sure user have the right permission to access the
  *       particular resource, by verifying their authentication status
  * @param { user } [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in
+ * @return Boolean
  ================================================================================== */
-export const requiredAuthentication = async user => {
-  if (!user || user == null || !isMongoId(String(user._id))) {
-    return {
-      err: { message: 'Not Authorized Access' }
-    }
-  }
-}
+export const requiredAuthentication = async user =>
+  !user || isEmpty(trim(user._id)) || !isMongoId(user._id) ? false : true
 
 /** ==================================================================================
  * @name requireClassroomMember()
