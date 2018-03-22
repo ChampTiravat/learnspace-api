@@ -1,4 +1,5 @@
 import ClassroomInvitation from './classroom-invitation'
+import ClassroomMember from './classroom-member'
 import Notification from './notification'
 import ChatMessage from './chat-message'
 import SubComment from './sub-comment'
@@ -14,6 +15,7 @@ import Post from './post'
 // importing these models one by one
 const models = {
   ClassroomInvitation,
+  ClassroomMember,
   Notification,
   ChatMessage,
   SubComment,

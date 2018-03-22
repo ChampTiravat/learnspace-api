@@ -1,9 +1,15 @@
 import { isEmpty, trim, isMongoId } from 'validator'
 
-import {
-  requiredAuthentication,
-  mustBeClassroomCreator
-} from '../../../helpers/security-helpers'
+import { requiredAuthentication } from '../../../helpers/security-helpers'
+import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
+
+const formatGraphQLErrorMessage = message => ({
+  success: false,
+  err: {
+    name: 'inviteUser',
+    message
+  }
+})
 
 /** ==================================================================================
  * @name inviteUser()
@@ -19,87 +25,46 @@ import {
 export default async (_, { candidateID, classroomID }, { models, user }) => {
   try {
     // Make sure user has authorized access
-    await requiredAuthentication(user)
-    await mustBeClassroomCreator(user, classroomID)
+    if (!requiredAuthentication(user))
+      return formatGraphQLErrorMessage('Authentication Required')
 
     // Validate inputs
-    if (isEmpty(trim(candidateID)) || !isMongoId(candidateID)) {
-      return {
-        success: false,
-        err: {
-          name: 'inviteUser',
-          message: 'Candidate ID invalid or not specified'
-        }
-      }
-    }
+    if (isEmpty(trim(candidateID)) || !isMongoId(candidateID))
+      return formatGraphQLErrorMessage('Candidate ID invalid or not specified')
 
-    if (isEmpty(trim(classroomID)) || !isMongoId(classroomID)) {
-      return {
-        success: false,
-        err: {
-          name: 'inviteUser',
-          message: 'Classroom ID invalid or not specified'
-        }
-      }
-    }
+    if (isEmpty(trim(classroomID)) || !isMongoId(classroomID))
+      return formatGraphQLErrorMessage('Classroom ID invalid or not specified')
 
     // Make sure a given classroom does exists
     const targetClassroom = await models.Classroom.findOne({
       _id: classroomID
     })
-    if (!classroom) {
-      return {
-        success: false,
-        err: {
-          name: 'inviteUser',
-          message: 'A given classroom does not exists'
-        }
-      }
-    }
+    if (!classroom)
+      return formatGraphQLErrorMessage('A given classroom does not exists')
 
     // Make sure a candidate user does exists
     const candidate = await models.User.findOne({ _id: candidateID })
-    if (!candidate) {
-      return {
-        success: false,
-        err: {
-          name: 'inviteUser',
-          message: 'A given candidate does not exists'
-        }
-      }
-    }
+    if (!candidate)
+      return formatGraphQLErrorMessage('A given candidate does not exists')
 
     // Candidate must not already being a member of a target classroom
     const memberWithSameCred = await targetClassroom.members.find(member =>
       equals(member._id, candidateID)
     )
-    if (memberWithSameCred) {
-      if (!memberWithSameCred) {
-        return {
-          success: false,
-          err: {
-            name: 'inviteUser',
-            message:
-              'A given candidate is already a member of a given classroom'
-          }
-        }
-      }
-    }
+    if (memberWithSameCred)
+      return formatGraphQLErrorMessage(
+        'A given candidate is already a member of a given classroom'
+      )
 
     // Do not send an invitation if it's already been sent
     const invitationWithSameCred = await models.ClassroomInvitation.findOne({
       candidate: candidateID,
       classroom: classroomID
     })
-    if (invitationWithSameCred) {
-      return {
-        success: false,
-        err: {
-          name: 'inviteUser',
-          message: 'A given candidate already recieve an invitation'
-        }
-      }
-    }
+    if (invitationWithSameCred)
+      return formatGraphQLErrorMessage(
+        'A given candidate already recieve an invitation'
+      )
 
     // Insert Invitation into ClassroomInvitations Collections(in MongoDB)
     await models.ClassroomInvitation.create({
@@ -111,16 +76,11 @@ export default async (_, { candidateID, classroomID }, { models, user }) => {
 
     // Return appropriete GraphQL response
     return {
-      success: true,
-      err: null
+      err: null,
+      success: true
     }
   } catch (err) {
-    return {
-      success: false,
-      err: {
-        name: 'inviteUser',
-        message: 'Server Error'
-      }
-    }
+    displayErrMessageWhenDev(err)
+    return formatGraphQLErrorMessage('Server Error')
   }
 }
