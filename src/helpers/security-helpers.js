@@ -1,38 +1,72 @@
 import jwt from 'jsonwebtoken'
 import { isMongoId, isEmpty, trim } from 'validator'
 
+import { displayErrMessageWhenDev } from './error-helpers'
 import { SECRET_TOKEN_KEY } from '../config/security-config'
 
 /** ==================================================================================
  * @name requiredAuthentication()
  * @desc Make sure user have the right permission to access the
  *       particular resource, by verifying their authentication status
- * @param { user } [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in
+ * @param user [GRAPHQL_CONTEXT] : Current user(Javascript Object) extracted from JWT Token since he/she was logged-in
  * @return Boolean
  ================================================================================== */
 export const requiredAuthentication = async user =>
   !user || isEmpty(trim(user._id)) || !isMongoId(user._id) ? false : true
 
+// /** ==================================================================================
+//  * @name requireClassroomMember()
+//  * @desc Make sure user have the right permission to access the
+//  *       particular resource, by Making sure they are classroom member
+//  * @param classroomID [GRAPHQL_ARGS] : Classroom ID
+//  * @param Classroom [GRAPHQL_CONTEXT] : Mongoose Model names "Classroom"
+//  * @param user [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in
+//  ================================================================================== */
+// export const requireClassroomMember = async (classroomID, Classroom, user) => {
+//   // In case the classroom ID was not provided. This means something went wrong
+//   if (isEmpty(trim(user._id)) || !isMongoId(user._id)) {
+//     return false //{ err: { message: 'Not Authorized Access' } }
+//   }
+
+//   // Checking wether user is a member of the given classroom or not
+//   // IF NOT isClassroomMember DO
+//   //    RETURN message "Not Authorized Access"
+// }
+
 /** ==================================================================================
- * @name requireClassroomMember()
+ * @name requiredClassroomAdmin()
  * @desc Make sure user have the right permission to access the
- *       particular resource, by Making sure they are classroom member
- * @param { classroomID } [GRAPHQL_ARGS] : Classroom ID
- * @param { Classroom } [GRAPHQL_CONTEXT] : Mongoose Model names "Classroom"
- * @param { user } [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in
+ *       particular resource, by Making sure they are classroom administrator(Admin)
+ * @param user [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in
+ * @param classroomID [GRAPHQL_ARGS] : Classroom ID
+ * @param ClassroomMember [GRAPHQL_CONTEXT] : Mongoose Model names "ClassroomMember"
+ * @return Boolean
  ================================================================================== */
-export const requireClassroomMember = async (classroomID, Classroom, user) => {
-  // Make sure user is already authenticated
-  await requiredAuthentication(user)
+export const requiredClassroomAdmin = async (
+  user,
+  classroomID,
+  ClassroomMember
+) => {
+  try {
+    // In case the classroom ID was not provided. This means something went wrong
+    if (!user || isEmpty(trim(user._id)) || !isMongoId(user._id)) {
+      return false
+    }
 
-  // In case the classroom ID was not provided. This means something went wrong
-  if (isEmpty(trim(_id)) || !isMongoId(_id)) {
-    return { err: { message: 'Not Authorized Access' } }
+    // Checking wether user is an admin of a given classroom or not
+    const isClassroomAdmin = await ClassroomMember.findOne({
+      classroom: classroomID,
+      member: user._id,
+      role: 'admin'
+    })
+
+    // return TRUE if user is an admin of a given classroom
+    // Other wise FALSE will be returned
+    return isClassroomAdmin ? true : false
+  } catch (err) {
+    displayErrMessageWhenDev(err)
+    return false
   }
-
-  // Checking wether user is a member of the given classroom or not
-  // IF NOT isClassroomMember DO
-  //    RETURN message "Not Authorized Access"
 }
 
 /** ==================================================================================
