@@ -7,7 +7,7 @@ import { SECRET_TOKEN_KEY } from '../config/security-config'
  * @name requiredAuthentication()
  * @desc Make sure user have the right permission to access the
  *       particular resource, by verifying their authentication status
- * @param { user } [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in
+ * @param user [GRAPHQL_CONTEXT] : Current user(Javascript Object) extracted from JWT Token since he/she was logged-in
  * @return Boolean
  ================================================================================== */
 export const requiredAuthentication = async user =>
@@ -17,9 +17,9 @@ export const requiredAuthentication = async user =>
  * @name requireClassroomMember()
  * @desc Make sure user have the right permission to access the
  *       particular resource, by Making sure they are classroom member
- * @param { classroomID } [GRAPHQL_ARGS] : Classroom ID
- * @param { Classroom } [GRAPHQL_CONTEXT] : Mongoose Model names "Classroom"
- * @param { user } [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in
+ * @param classroomID [GRAPHQL_ARGS] : Classroom ID
+ * @param Classroom [GRAPHQL_CONTEXT] : Mongoose Model names "Classroom"
+ * @param user [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in
  ================================================================================== */
 export const requireClassroomMember = async (classroomID, Classroom, user) => {
   // Make sure user is already authenticated
