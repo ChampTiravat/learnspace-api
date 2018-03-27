@@ -46,14 +46,14 @@ export default `
 
   type Mutation {
 
-    createClassroom(
+    createClassroom (
       name: String!,
       description: String!,
       subject: String!
     ) : CreateClassroomResponse!
     
-    inviteUser(
-      candidateID: String!,
+    inviteUser (
+      candidateIdent: String!,
       classroomID: String!
     ) : InviteUserResponse!
   }

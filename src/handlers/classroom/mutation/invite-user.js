@@ -1,4 +1,4 @@
-import { isEmpty, trim, isMongoId } from 'validator'
+import { isEmpty, trim, isMongoId, isEmail, isAlphanumeric } from 'validator'
 
 import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
 import {
@@ -19,13 +19,14 @@ const formatGraphQLErrorMessage = message => ({
  * @type resolver
  * @desc Send a classroom invitation to a given user
  * @param parent : default parameter from ApolloServer
- * @param { candidateID } [GRAPHQL_ARGS] : ID if the candidate(target user who recieve an invitation)
+ * @param { candidateIdent } [GRAPHQL_ARGS] : Self-Identification(Email or Username)
+ *             of the candidate(target user who recieve an invitation)
  * @param { classroomID } [GRAPHQL_ARGS] : Classroom ID
  * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
  * @param { user } [GRAPHQL_CONTEXT] : Current logged-in user(used as a classroom creator)
- * @return Object : GraphQL CraeteClassroomResponse Type
+ * @return Object : GraphQL InviteUserResponse Type
  ================================================================================== */
-export default async (_, { candidateID, classroomID }, { models, user }) => {
+export default async (_, { candidateIdent, classroomID }, { models, user }) => {
   try {
     // =========================================================
     // Authentication
@@ -41,11 +42,33 @@ export default async (_, { candidateID, classroomID }, { models, user }) => {
     // =========================================================
     // Inputs Validation
     // =========================================================
-    if (isEmpty(trim(candidateID)) || !isMongoId(candidateID))
-      return formatGraphQLErrorMessage('Candidate ID invalid or not specified')
+    if (isEmpty(trim(candidateIdent)))
+      return formatGraphQLErrorMessage(
+        'Candidate Identification is not specified'
+      )
 
+    // User Identification must contains only Alpha & Numeric or Email format
+    if (!isEmail(candidateIdent) && !isAlphanumeric(candidateIdent))
+      return formatGraphQLErrorMessage('Candidate Identification invalid')
+
+    // Classroom ID must be MongoDB index value
     if (isEmpty(trim(classroomID)) || !isMongoId(classroomID))
-      return formatGraphQLErrorMessage('Classroom ID invalid or not specified')
+      return formatGraphQLErrorMessage(
+        'Classroom Identification invalid or not specified'
+      )
+
+    // =========================================================
+    // Make sure a candidate user does exists
+    // =========================================================
+    // Find the user candidate using his/her email or username,
+    // depending on what's being given
+    const candidate = await models.User.findOne({
+      $or: [{ username: candidateIdent }, { email: candidateIdent }]
+    })
+
+    // If user does not exists
+    if (!candidate)
+      return formatGraphQLErrorMessage('A given candidate does not exists')
 
     // =========================================================
     // Make sure a given classroom does exists
@@ -58,19 +81,11 @@ export default async (_, { candidateID, classroomID }, { models, user }) => {
       return formatGraphQLErrorMessage('A given classroom does not exists')
 
     // =========================================================
-    // Make sure a candidate user does exists
-    // =========================================================
-    const candidate = await models.User.findOne({ _id: candidateID })
-
-    if (!candidate)
-      return formatGraphQLErrorMessage('A given candidate does not exists')
-
-    // =========================================================
     // Candidate must not already being a member of a target classroom
     // =========================================================
     const memberWithSameCred = await models.ClassroomMember.findOne({
       classroom: classroomID,
-      member: candidateID
+      member: candidate._id
     })
 
     if (memberWithSameCred)
@@ -82,10 +97,11 @@ export default async (_, { candidateID, classroomID }, { models, user }) => {
     // Do not send an invitation if it's already been sent
     // =========================================================
     const invitationWithSameCred = await models.ClassroomInvitation.findOne({
-      candidate: candidateID,
+      candidate: candidate._id,
       classroom: classroomID
     })
 
+    // Abort! if the invitation is already been sent
     if (invitationWithSameCred)
       return formatGraphQLErrorMessage(
         'A given candidate already recieve an invitation'
@@ -94,8 +110,9 @@ export default async (_, { candidateID, classroomID }, { models, user }) => {
     // =========================================================
     // Insert Invitation into ClassroomInvitations Collections(in MongoDB)
     // =========================================================
+    // Everything is alright. Send an invitation to the candidate
     await models.ClassroomInvitation.create({
-      candidate: candidateID,
+      candidate: candidate._id,
       classroom: classroomID
     })
 
