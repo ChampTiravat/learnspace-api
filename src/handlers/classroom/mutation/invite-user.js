@@ -32,11 +32,11 @@ export default async (_, { candidateIdent, classroomID }, { models, user }) => {
     // Authentication
     // =========================================================
     // Make sure user has authorized access
-    if (requiredAuthentication(user))
+    if (!requiredAuthentication(user))
       return formatGraphQLErrorMessage('Authentication Required')
 
     // User must be a classroom administrator
-    if (requiredClassroomAdmin(user, classroomID, models.ClassroomMember))
+    if (!requiredClassroomAdmin(user, classroomID, models.ClassroomMember))
       return formatGraphQLErrorMessage('Permission Denied')
 
     // =========================================================
