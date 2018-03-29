@@ -59,7 +59,3 @@ Learnspace is a learning management system(LMS) originally built to enhance the 
 ### IDEA
 
 * MongoDB replica sets
-
-### DONE
-
-* In Classroom Invitation Modal (line 26th) we have to pass Classroom ID as an arg. But since, we can not retrieve it. Because the modal is render from AuthenticatedLayout which cannot access the ID. The solution is we have to move the modal to /classroom, /classroom_member, /classroom\* in order to receive the classroomID
