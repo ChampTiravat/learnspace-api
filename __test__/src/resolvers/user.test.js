@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 import User from '../../../src/models/user'
-const TEST_URL = 'http://localhost:5000/graphql'
+import { TEST_URL } from '../../config'
 
 beforeEach(() => {
 	return Promise.resolve(User.remove({}))

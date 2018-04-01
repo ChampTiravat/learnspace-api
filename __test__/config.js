@@ -1,0 +1,1 @@
+export const TEST_URL = 'http://localhost:5000/graphql'
