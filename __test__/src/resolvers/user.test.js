@@ -1,7 +1,7 @@
 import axios from 'axios'
 
+import { TEST_URL } from '../../test-config'
 import User from '../../../src/models/user'
-import { TEST_URL } from '../../config'
 
 beforeEach(() => {
 	return Promise.resolve(User.remove({}))
