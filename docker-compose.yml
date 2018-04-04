@@ -1,67 +1,29 @@
 version: "3"
 services:
-
-
+       
   node-api:
-    build: "."
-    ports:
-      - "5000:5000"
-    links:
-      - mongodb
-      - redis
-    volumes:
-      - "./src:/learnspace-api/src"
-      - "./__test__:/learnspace-api/__test__"
-      - "./package.json:/learnspace-api/package.json"
-    environment:
-      - NODE_ENV=development
-
-      - APP_PORT=5000
-
-      - MONGODB_DEV_HOST=mongodb
-      - MONGODB_DEV_PORT=27017
-      - MONGODB_DEV_DBNAME=learnspace_dev
-
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379 
-
-      - SECRET_TOKEN_KEY=some_secure_key_for_dev
-
+          build: "."
+          ports:
+                  - "5000:5000"
+          links:
+                  - mongodb
+                  - redis
+                  - mongodb-test
+                  - redis-test
+          volumes:
+                  - "./src:/learnspace-api/src"
+                  - "./__test__:/learnspace-api/__test__"
+                  - "./package.json:/learnspace-api/package.json"
+                  - "./yarn.lock:/learnspace-api/yarn.lock"
 
   mongodb:
-    image: mongo
-  
+           image: mongo
+
   redis:
-    image: redis
-
-
-  node-api-test:
-    build: "."
-    ports:
-      - "8000:8000"
-    links:
-      - mongodb-test
-      - redis-test
-    volumes:
-      - "./src:/learnspace-api/src"
-      - "./__test__:/learnspace-api/__test__"
-      - "./package.json:/learnspace-api/package.json"
-    environment:
-      - NODE_ENV=test
-
-      - APP_PORT=8000
-
-      - MONGODB_DEV_HOST=mongodb-test
-      - MONGODB_DEV_PORT=27017
-      - MONGODB_DEV_DBNAME=learnspace_test
-
-      - REDIS_HOST=redis-test
-      - REDIS_PORT=6379 
-
-      - SECRET_TOKEN_KEY=some_secure_key_for_testing
+          image: redis
 
   mongodb-test:
-    image: mongo
+          image: mongo
   
   redis-test:
-    image: redis
+          image: redis
