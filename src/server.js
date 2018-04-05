@@ -92,7 +92,17 @@ app.use(
 // Startint the server
 server.listen(APP_PORT, APP_HOST, err => {
   if (err) throw err
-  console.log(`Server started at ${APP_SERVING_PATH}`)
+  console.log(`
+=============================================================
+           |
+    Server |    ${APP_SERVING_PATH}
+           |
+-----------|-------------------------------------------------
+           |
+  Database |    ${DB_CONNECTION_STRING}
+           |
+=============================================================
+`)
 
   const subscriptionMetaData = {
     execute,
