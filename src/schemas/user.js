@@ -46,7 +46,7 @@ export default `
 
       userClassroomInvitations(
         _id: String!
-      ) UserClassroomInvitationsResponse!
+      ): UserClassroomInvitationsResponse!
 
   }
 
