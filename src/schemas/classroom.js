@@ -39,6 +39,12 @@ export default `
     err: Error
   }
 
+  type ClassroomInvitation {
+    classroomName: String!
+    classroomId: String!
+    issueDate: String!
+  }
+
   type Query {
     classroomProfile(_id: String!): ClassroomProfileResponse!
     userClassrooms(_id: String!): UserClassroomsResponse!
