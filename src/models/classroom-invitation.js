@@ -11,6 +11,12 @@ const ClassroomInvitationSchema = new Schema({
     ref: 'Classroom',
     required: true
   },
+  status: {
+    // Possible values are => ["waiting", "accepted", "refused"]
+    type: String,
+    required: true,
+    default: "waiting"
+  },
   createdAt: { type: Date, default: Date.now() },
   updatedAt: { type: Date, default: Date.now() }
 })
