@@ -15,7 +15,7 @@ const ClassroomInvitationSchema = new Schema({
     // Possible values are => ["waiting", "accepted", "refused"]
     type: String,
     required: true,
-    default: "waiting"
+    default: 'waiting'
   },
   createdAt: { type: Date, default: Date.now() },
   updatedAt: { type: Date, default: Date.now() }

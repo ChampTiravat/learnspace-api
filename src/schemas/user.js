@@ -35,8 +35,19 @@ export default `
     err: Error 
   }
 
+  type UserClassroomInvitationsResponse {
+    invitations: [ClassroomInvitation]!
+    err: Error
+  }
+
   type Query {
+
       userProfile(_id: String): UserProfileResponse!
+
+      userClassroomInvitations(
+        _id: String!
+      ) UserClassroomInvitationsResponse!
+
   }
 
   type Mutation {
