@@ -15,6 +15,7 @@ services:
                   - "./__test__:/learnspace-api/__test__"
                   - "./package.json:/learnspace-api/package.json"
                   - "./yarn.lock:/learnspace-api/yarn.lock"
+                  - "./.env:/learnspace-api/.env"
 
   mongodb:
            image: mongo
