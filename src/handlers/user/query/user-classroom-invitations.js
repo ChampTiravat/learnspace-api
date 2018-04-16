@@ -27,7 +27,7 @@ export default async (_, { _id }, { models, user }) => {
     // Authentication
     // =========================================================
     // Make sure user has authorized access
-    if (requiredAuthentication(user))
+    if (!requiredAuthentication(user))
       return formatGraphQLErrorMessage('Authentication Required')
 
     // =========================================================
