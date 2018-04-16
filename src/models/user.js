@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose'
 
-const DEFAULT_PROFILE_PICTURE = 'some picture url'
+const DEFAULT_PROFILE_PICTURE = '/static/images/default/user-profile.jpg'
 const DEFAULT_USER_ROLE = 'user'
 
 const UserSchema = new Schema({
