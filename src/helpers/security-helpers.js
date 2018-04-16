@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken'
 import { isMongoId, isEmpty, trim } from 'validator'
 
-import { displayErrMessageWhenDev } from './error-helpers'
 import { SECRET_TOKEN_KEY } from '../config/security-config'
+import { displayErrMessageWhenDev } from './error-helpers'
+import ClassroomMember from '../models/classroom-member'
 
 /** ==================================================================================
  * @name requiredAuthentication()
@@ -14,24 +15,28 @@ import { SECRET_TOKEN_KEY } from '../config/security-config'
 export const requiredAuthentication = async user =>
   !user || isEmpty(trim(user._id)) || !isMongoId(user._id) ? false : true
 
-// /** ==================================================================================
-//  * @name requireClassroomMember()
-//  * @desc Make sure user have the right permission to access the
-//  *       particular resource, by Making sure they are classroom member
-//  * @param classroomID [GRAPHQL_ARGS] : Classroom ID
-//  * @param Classroom [GRAPHQL_CONTEXT] : Mongoose Model names "Classroom"
-//  * @param user [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in
-//  ================================================================================== */
-// export const requireClassroomMember = async (classroomID, Classroom, user) => {
-//   // In case the classroom ID was not provided. This means something went wrong
-//   if (isEmpty(trim(user._id)) || !isMongoId(user._id)) {
-//     return false //{ err: { message: 'Not Authorized Access' } }
-//   }
+/** ==================================================================================
+ * @name requireClassroomMember()
+ * @desc Make sure user have the right permission to access the
+ *       particular resource, by Making sure they are classroom member.
+ * @param classroomID [GRAPHQL_ARGS] : Classroom ID.
+ * @param user [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in.
+ ================================================================================== */
+export const requireClassroomMember = async (user, classroomID) => {
+  // In case the classroom ID was not provided. This means user is not authenticated.
+  if (isEmpty(trim(user._id)) || !isMongoId(user._id)) {
+    return false
+  }
 
-//   // Checking wether user is a member of the given classroom or not
-//   // IF NOT isClassroomMember DO
-//   //    RETURN message "Not Authorized Access"
-// }
+  // Checking wether user is a member of the given classroom or not.
+  const isMember = await ClassroomMember.find({
+    member: user._id,
+    classroom: classroomID
+  })
+
+  // Return TRUE, if a given user is a member of a given classroom. Otherwise, return FALSE.
+  return isMember ? true : false
+}
 
 /** ==================================================================================
  * @name requiredClassroomAdmin()
@@ -42,11 +47,7 @@ export const requiredAuthentication = async user =>
  * @param ClassroomMember [GRAPHQL_CONTEXT] : Mongoose Model names "ClassroomMember"
  * @return Boolean
  ================================================================================== */
-export const requiredClassroomAdmin = async (
-  user,
-  classroomID,
-  ClassroomMember
-) => {
+export const requiredClassroomAdmin = async (user, classroomID, ClassroomMember) => {
   try {
     // In case the classroom ID was not provided. This means something went wrong
     if (!user || isEmpty(trim(user._id)) || !isMongoId(user._id)) {
@@ -103,8 +104,7 @@ export const generateToken = async (payload, type) => {
   if (!payload || payload == null)
     throw new Error("ERROR: 1st parameter 'payload' not specified!")
 
-  if (!type || type === '')
-    throw new Error("ERROR: 2nd parameter 'type' not specified!")
+  if (!type || type === '') throw new Error("ERROR: 2nd parameter 'type' not specified!")
 
   if (type === 'accessToken') {
     token = await jwt.sign(payload, SECRET_TOKEN_KEY, {
