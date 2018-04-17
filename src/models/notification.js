@@ -33,4 +33,7 @@ const NotificationSchema = new Schema({
   updatedAt: { type: Date, default: Date.now() }
 })
 
+NotificationSchema.set('redisCache', true)
+NotificationSchema.set('expires', 60)
+
 export default mongoose.model('notifications', NotificationSchema)

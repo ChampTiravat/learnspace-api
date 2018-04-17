@@ -46,6 +46,9 @@ const ClassroomSchema = new Schema({
   updatedAt: { type: Date, default: Date.now() }
 })
 
+ClassroomSchema.set('redisCache', true)
+ClassroomSchema.set('expires', 60)
+
 mongoose.model('course-outline', CourseOutlineSchema)
 
 export default mongoose.model('classrooms', ClassroomSchema)

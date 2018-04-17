@@ -25,4 +25,7 @@ const CommentSchema = new Schema({
   updatedAt: { type: Date, default: Date.now() }
 })
 
+CommentSchema.set('redisCache', true)
+CommentSchema.set('expires', 60)
+
 export default mongoose.model('comments', CommentSchema)
