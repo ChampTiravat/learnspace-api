@@ -24,7 +24,7 @@ export default async (_, { postID }, { models, user }) => {
     }
 
     // The post must be exists
-    const postToRemove = await models.Post.findOne({ _id: postID })
+    const postToRemove = await models.Post.findOne({ _id: postID }).lean()
     if (!postToRemove) {
       return {
         success: false,

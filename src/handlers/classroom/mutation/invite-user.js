@@ -43,9 +43,7 @@ export default async (_, { candidateIdent, classroomID }, { models, user }) => {
     // Inputs Validation
     // =========================================================
     if (isEmpty(trim(candidateIdent)))
-      return formatGraphQLErrorMessage(
-        'Candidate Identification is not specified'
-      )
+      return formatGraphQLErrorMessage('Candidate Identification is not specified')
 
     // User Identification must contains only Alpha & Numeric or Email format
     if (!isEmail(candidateIdent) && !isAlphanumeric(candidateIdent))
@@ -64,18 +62,17 @@ export default async (_, { candidateIdent, classroomID }, { models, user }) => {
     // depending on what's being given
     const candidate = await models.User.findOne({
       $or: [{ username: candidateIdent }, { email: candidateIdent }]
-    })
+    }).lean()
 
     // If user does not exists
-    if (!candidate)
-      return formatGraphQLErrorMessage('A given candidate does not exists')
+    if (!candidate) return formatGraphQLErrorMessage('A given candidate does not exists')
 
     // =========================================================
     // Make sure a given classroom does exists
     // =========================================================
     const targetClassroom = await models.Classroom.findOne({
       _id: classroomID
-    })
+    }).lean()
 
     if (!targetClassroom)
       return formatGraphQLErrorMessage('A given classroom does not exists')
@@ -86,7 +83,7 @@ export default async (_, { candidateIdent, classroomID }, { models, user }) => {
     const memberWithSameCred = await models.ClassroomMember.findOne({
       classroom: classroomID,
       member: candidate._id
-    })
+    }).lean()
 
     if (memberWithSameCred)
       return formatGraphQLErrorMessage(
@@ -99,13 +96,11 @@ export default async (_, { candidateIdent, classroomID }, { models, user }) => {
     const invitationWithSameCred = await models.ClassroomInvitation.findOne({
       candidate: candidate._id,
       classroom: classroomID
-    })
+    }).lean()
 
     // Abort! if the invitation is already been sent
     if (invitationWithSameCred)
-      return formatGraphQLErrorMessage(
-        'A given candidate already recieve an invitation'
-      )
+      return formatGraphQLErrorMessage('A given candidate already recieve an invitation')
 
     // =========================================================
     // Insert Invitation into ClassroomInvitations Collections(in MongoDB)

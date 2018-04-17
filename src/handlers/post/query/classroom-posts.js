@@ -23,7 +23,7 @@ export default async (_, { _id }, { models }) => {
     }
 
     // Check classroom must be exists!
-    const classroom = await models.Classroom.findOne({ _id })
+    const classroom = await models.Classroom.findOne({ _id }).lean()
 
     if (!classroom) {
       return {
@@ -36,7 +36,7 @@ export default async (_, { _id }, { models }) => {
     }
 
     // Querying all post in the classroom
-    const posts = await models.Post.find({ classroom: _id })
+    const posts = await models.Post.find({ classroom: _id }).lean()
 
     return {
       posts,

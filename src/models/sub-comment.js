@@ -19,4 +19,7 @@ const SubCommentSchema = new Schema({
   updatedAt: { type: Date, default: Date.now() }
 })
 
+SubCommentSchema.set('redisCache', true)
+SubCommentSchema.set('expires', 60)
+
 export default mongoose.model('sub_comments', SubCommentSchema)

@@ -21,7 +21,7 @@ const ClassroomInvitationSchema = new Schema({
   updatedAt: { type: Date, default: Date.now() }
 })
 
-export default mongoose.model(
-  'classroom_invitations',
-  ClassroomInvitationSchema
-)
+ClassroomInvitationSchema.set('redisCache', true)
+ClassroomInvitationSchema.set('expires', 60)
+
+export default mongoose.model('classroom_invitations', ClassroomInvitationSchema)

@@ -23,19 +23,32 @@ export const requiredAuthentication = async user =>
  * @param user [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in.
  ================================================================================== */
 export const requireClassroomMember = async (user, classroomID) => {
-  // In case the classroom ID was not provided. This means user is not authenticated.
-  if (isEmpty(trim(user._id)) || !isMongoId(user._id)) {
+  try {
+    const userID = String(user._id)
+    const classID = String(classroomID)
+
+    // In case the user ID was not provided. This means user is not authenticated.
+    if (isEmpty(trim(userID)) || !isMongoId(userID)) {
+      return false
+    }
+
+    // In case the classroom ID was not provided. return FALSE
+    if (isEmpty(trim(classID)) || !isMongoId(classID)) {
+      return false
+    }
+
+    // Checking wether user is a member of the given classroom or not.
+    const isMember = await ClassroomMember.findOne({
+      member: userID,
+      classroom: classroomID
+    })
+
+    // Return TRUE, if a given user is a member of a given classroom. Otherwise, return FALSE.
+    return !!isMember
+  } catch (err) {
+    displayErrMessageWhenDev(err)
     return false
   }
-
-  // Checking wether user is a member of the given classroom or not.
-  const isMember = await ClassroomMember.find({
-    member: user._id,
-    classroom: classroomID
-  })
-
-  // Return TRUE, if a given user is a member of a given classroom. Otherwise, return FALSE.
-  return isMember ? true : false
 }
 
 /** ==================================================================================

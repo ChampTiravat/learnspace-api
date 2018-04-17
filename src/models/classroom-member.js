@@ -19,4 +19,7 @@ const ClassroomMemberSchema = new Schema({
   updatedAt: { type: Date, default: Date.now() }
 })
 
+ClassroomMemberSchema.set('redisCache', true)
+ClassroomMemberSchema.set('expires', 60)
+
 export default mongoose.model('classroom_members', ClassroomMemberSchema)

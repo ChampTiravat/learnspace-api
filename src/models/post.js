@@ -30,4 +30,7 @@ const PostSchema = new Schema({
   updatedAt: { type: Date, default: Date.now() }
 })
 
+PostSchema.set('redisCache', true)
+PostSchema.set('expires', 60)
+
 export default mongoose.model('posts', PostSchema)

@@ -36,4 +36,7 @@ const UserSchema = new Schema({
   updatedAt: { type: Date, default: Date.now() }
 })
 
+UserSchema.set('redisCache', true)
+UserSchema.set('expires', 60)
+
 export default mongoose.model('users', UserSchema)

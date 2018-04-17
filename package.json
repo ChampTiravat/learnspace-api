@@ -9,12 +9,10 @@
   "scripts": {
     "test": "jest",
     "dev-server": "nodemon --exec babel-node ./src/server.js",
-    "test-server":
-      "export SECRET_TOKEN_KEY='very secure key', TESTING=true; nodemon --exec babel-node ./src/server.js"
+    "test-server": "export SECRET_TOKEN_KEY='very secure key', TESTING=true; nodemon --exec babel-node ./src/server.js"
   },
   "dependencies": {
     "apollo-server-express": "^1.1.7",
-    "axios": "^0.17.1",
     "bcrypt": "^1.0.3",
     "bluebird": "^3.5.1",
     "body-parser": "^1.18.2",
@@ -27,6 +25,7 @@
     "jsonwebtoken": "^8.1.0",
     "merge-graphql-schemas": "^1.2.0",
     "mongoose": "^4.12.3",
+    "mongoose-redis-cache": "^0.0.3",
     "nodemon": "^1.12.1",
     "passport": "^0.4.0",
     "passport-jwt": "^3.0.0",
@@ -40,7 +39,6 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-2": "^6.24.1",
     "eslint": "^4.15.0",
-    "jest": "^21.2.1",
-    "xmlhttprequest": "^1.8.0"
+    "jest": "^21.2.1"
   }
 }

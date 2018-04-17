@@ -15,18 +15,10 @@ import { ENG_THA_NUM_ALPHA } from '../../../constants/regex-patterns'
  * @param { user } [GRAPHQL_CONTEXT] : Currnet logged-in user(extracted from JWT token)
  * @return Object : GraphQL CreatePostResponse Type
  ================================================================================== */
-export default async (
-  _,
-  { classroomID, title, recipe, isPublic },
-  { models, user }
-) => {
+export default async (_, { classroomID, title, recipe, isPublic }, { models, user }) => {
   try {
     // Validation
-    if (
-      isEmpty(trim(classroomID)) ||
-      isEmpty(trim(recipe)) ||
-      isEmpty(trim(title))
-    ) {
+    if (isEmpty(trim(classroomID)) || isEmpty(trim(recipe)) || isEmpty(trim(title))) {
       return {
         success: false,
         post: null,
@@ -75,7 +67,7 @@ export default async (
     // Checking classroom is exists?
     const targetClassroom = await models.Classroom.findOne({
       _id: classroomID
-    })
+    }).lean()
 
     if (!targetClassroom) {
       return {

@@ -9,23 +9,26 @@ import bluebird from 'bluebird'
 import bodyParser from 'body-parser'
 import { subscribe, execute } from 'graphql'
 import { makeExecutableSchema } from 'graphql-tools'
+import mongooseRedisCache from 'mongoose-redis-cache'
 import { SubscriptionServer } from 'subscriptions-transport-ws'
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express'
 import { fileLoader, mergeTypes, mergeResolvers } from 'merge-graphql-schemas'
 
 // Configurations
-import { DB_CONNECTION_STRING, REDIS_HOST } from './config/database-config'
+import { DB_CONNECTION_STRING, REDIS_HOST, REDIS_PORT } from './config/database-config'
+
+import {
+  SUBSCRIPTION_ENDPOINT,
+  GRAPHIQL_ENDPOINT,
+  GRAPHQL_ENDPOINT
+} from './config/graphql-config'
+
 import {
   APP_SERVING_PATH,
   WEB_CLIENT_HOST,
   APP_PORT,
   APP_HOST
 } from './config/application-config'
-import {
-  SUBSCRIPTION_ENDPOINT,
-  GRAPHIQL_ENDPOINT,
-  GRAPHQL_ENDPOINT
-} from './config/graphql-config'
 
 // Helpers
 import extractUserFromToken from './middlewares/extractUserFromToken'
@@ -39,6 +42,12 @@ const server = http.createServer(app)
 mongoose.Promise = bluebird
 mongoose.connect(DB_CONNECTION_STRING, {
   useMongoClient: true
+})
+
+// Enable Redis Cache for Mongoose queries
+mongooseRedisCache(mongoose, {
+  host: REDIS_HOST,
+  port: REDIS_PORT
 })
 
 // Connection to Redis

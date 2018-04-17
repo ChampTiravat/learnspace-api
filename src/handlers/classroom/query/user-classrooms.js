@@ -23,7 +23,8 @@ export default async (_, { _id }, { models }) => {
     }
 
     // Quering a classroom
-    const classrooms = await models.Classroom.find({ creator: _id })
+    const classrooms = await models.Classroom.find({ creator: _id }).lean()
+
     return {
       classrooms,
       err: null

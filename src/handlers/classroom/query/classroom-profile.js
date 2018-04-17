@@ -7,6 +7,7 @@ import {
 } from '../../../helpers/security-helpers'
 
 const formatGraphQLErrorMessage = message => ({
+  isMember: false,
   classroom: null,
   err: {
     name: 'classroom',
@@ -33,9 +34,40 @@ export default async (_, { _id }, { models, user }) => {
     if (!requiredAuthentication(user))
       return formatGraphQLErrorMessage('Authentication Required')
 
-    // User must be a member of a given classroom
-    if (!requireClassroomMember(user, _id))
-      return formatGraphQLErrorMessage('Permission Denied')
+    // Check if user is a member of a given classroom or not
+    const isClassroomMember = await requireClassroomMember(user, _id)
+
+    // If user is NOT a member of a given classroom
+    if (!isClassroomMember) {
+      const classroom = await models.Classroom.findOne(
+        { _id },
+        'name creator subject thumbnail description'
+      ).lean()
+
+      // If a given classroom does not exist
+      if (!classroom) return formatGraphQLErrorMessage('Classroom not found')
+
+      const classroomCreator = await models.User.findOne(
+        { _id: classroom.creator },
+        'fname lname'
+      ).lean()
+
+      return {
+        isMember: false,
+        classroom: {
+          _id: classroom._id,
+          name: classroom.name,
+          creator: classroomCreator,
+          subject: classroom.subject,
+          thumbnail: classroom.thumbnail,
+          description: classroom.description
+        },
+        err: {
+          name: 'classroom',
+          message: 'Permission Denied'
+        }
+      }
+    }
 
     // =========================================================
     // Input Validation
@@ -46,7 +78,7 @@ export default async (_, { _id }, { models, user }) => {
     // =========================================================
     // Quering a classroom
     // =========================================================
-    const classroom = await models.Classroom.findOne({ _id })
+    const classroom = await models.Classroom.findOne({ _id }).lean()
 
     // =========================================================
     // Quering members of a given classroom
@@ -54,21 +86,21 @@ export default async (_, { _id }, { models, user }) => {
     const classroomMembers = await models.ClassroomMember.find({
       member: user._id,
       classroom: _id
-    })
+    }).lean()
 
     // =========================================================
     // Quering a creator of the classroom
     // =========================================================
     const classroomCreator = await models.User.findOne({
       _id: classroom.creator
-    })
+    }).lean()
 
     // =========================================================
     // Querying posts related to a given classroom
     // =========================================================
     const classroomPosts = await models.Post.find({
       classroom: classroom._id
-    })
+    }).lean()
 
     // =========================================================
     // in case a given classroom does not found
@@ -85,6 +117,7 @@ export default async (_, { _id }, { models, user }) => {
     // Return appropriete GraphQL response
     // =========================================================
     return {
+      isMember: true,
       classroom: {
         _id: classroom._id,
         name: classroom.name,

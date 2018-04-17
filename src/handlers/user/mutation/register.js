@@ -2,10 +2,7 @@ import { equals, isEmail, isEmpty, trim, isAlphanumeric } from 'validator'
 import bcrypt from 'bcrypt'
 
 import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
-import {
-  ENG_THA_NUM_ALPHA,
-  PASSWORD_PATTERN
-} from '../../../constants/regex-patterns'
+import { ENG_THA_NUM_ALPHA, PASSWORD_PATTERN } from '../../../constants/regex-patterns'
 
 const formatGraphQLErrorMessage = message => ({
   success: false,
@@ -29,11 +26,7 @@ const formatGraphQLErrorMessage = message => ({
  * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
  * @return Object : GraphQL RegisterResponse Type
  ================================================================================== */
-export default async (
-  _,
-  { fname, lname, email, password, username },
-  { models }
-) => {
+export default async (_, { fname, lname, email, password, username }, { models }) => {
   try {
     // =========================================================
     // Inputs Validation
@@ -45,9 +38,7 @@ export default async (
       isEmpty(trim(lname)) ||
       isEmpty(trim(password))
     ) {
-      return formatGraphQLErrorMessage(
-        'Important credentials should not be empty'
-      )
+      return formatGraphQLErrorMessage('Important credentials should not be empty')
     }
 
     // Email format Validation
@@ -81,7 +72,7 @@ export default async (
     // =========================================================
     const userWithTheSameCreds = await models.User.findOne({
       $or: [{ email: email }, { username: username }]
-    })
+    }).lean()
 
     // =========================================================
     // User email and username must be unique. So, we're checking for a conflict
@@ -89,15 +80,11 @@ export default async (
     if (userWithTheSameCreds) {
       // Email conflict
       if (equals(userWithTheSameCreds.email, email))
-        return formatGraphQLErrorMessage(
-          'User already exist with the given email'
-        )
+        return formatGraphQLErrorMessage('User already exist with the given email')
 
       // Username conflict
       if (equals(userWithTheSameCreds.username, username))
-        return formatGraphQLErrorMessage(
-          'User already exist with the given username'
-        )
+        return formatGraphQLErrorMessage('User already exist with the given username')
     }
 
     // =========================================================
