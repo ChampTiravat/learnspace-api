@@ -1,4 +1,4 @@
-import { isEmpty, trim, isMongoId } from 'validator'
+import { equals, isEmpty, trim, isMongoId } from 'validator'
 
 import { requiredAuthentication } from '../../..//helpers/security-helpers'
 import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
@@ -55,11 +55,11 @@ export default async (_, { _id }, { models, user }) => {
     // =========================================================
     // Querying the name of each Classroom
     // =========================================================
-    const cNames = await models.Classroom.find(
+    const classroomsInfo = await models.Classroom.find(
       {
         _id: { $in: [...rawInvitations.map(invt => invt.classroom)] }
       },
-      '_id name'
+      '_id name thumbnail'
     ).lean()
 
     // =========================================================
@@ -68,15 +68,23 @@ export default async (_, { _id }, { models, user }) => {
     // MongoDB collections and then, map them to the corresponding attribs in GraphQL Types
     // =========================================================
     const invitations = await rawInvitations.reduce((totalInvt, nextInvt) => {
+      // We have to find the "name" and "thumbnail" of the classroom by looking for the classroom
+      // that has the same "_id". Then, we just pull-off only the "name" attrib
+      // of that classroom object that we found
+      const { thumbnail, name } = classroomsInfo.find(n =>
+        equals(String(n._id), String(nextInvt.classroom))
+      )
+
+      // Create a classroom invitation object with the right property names,
+      // matching with GraphQL ClassroomInvitation Type
       const mutatedInvt = {
-        classroomId: nextInvt.classroom,
+        classroomID: nextInvt.classroom,
         issueDate: nextInvt.createdAt,
-        // We have to find the "name" of the classroom by looking for the classroom
-        // that has the same "_id". Then, we just pull-off only the "name" attrib
-        // of that classroom object that we found
-        classroomName: cNames.find(n => String(n._id) === String(nextInvt.classroom)).name
+        thumbnail: thumbnail,
+        classroomName: name
       }
 
+      // Attach classroom invitation object above to the array of classroom invitations
       return totalInvt.concat(mutatedInvt)
     }, [])
 

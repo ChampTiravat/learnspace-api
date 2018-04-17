@@ -28,6 +28,12 @@ const formatGraphQLErrorMessage = message => ({
 export default async (_, { _id }, { models, user }) => {
   try {
     // =========================================================
+    // Input Validation
+    // =========================================================
+    if (isEmpty(trim(_id)) || !isMongoId(_id))
+      return formatGraphQLErrorMessage('Classroom ID invalid or not specified')
+
+    // =========================================================
     // Authentication
     // =========================================================
     // Use must be logged-in
@@ -39,6 +45,9 @@ export default async (_, { _id }, { models, user }) => {
 
     // If user is NOT a member of a given classroom
     if (!isClassroomMember) {
+      // Query a given classroom for a preview. Because the user is
+      // not a member of the classroom. So, we will only show a brief info
+      // about the classroom
       const classroom = await models.Classroom.findOne(
         { _id },
         'name creator subject thumbnail description'
@@ -47,11 +56,13 @@ export default async (_, { _id }, { models, user }) => {
       // If a given classroom does not exist
       if (!classroom) return formatGraphQLErrorMessage('Classroom not found')
 
+      // Query the creator of a given classroom
       const classroomCreator = await models.User.findOne(
         { _id: classroom.creator },
         'fname lname'
       ).lean()
 
+      // Return GraphQL response with a limit of the classroom information
       return {
         isMember: false,
         classroom: {
@@ -68,12 +79,6 @@ export default async (_, { _id }, { models, user }) => {
         }
       }
     }
-
-    // =========================================================
-    // Input Validation
-    // =========================================================
-    if (isEmpty(trim(_id)) || !isMongoId(_id))
-      return formatGraphQLErrorMessage('Classroom ID invalid or not specified')
 
     // =========================================================
     // Quering a classroom

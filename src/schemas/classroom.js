@@ -42,7 +42,8 @@ export default `
 
   type ClassroomInvitation {
     classroomName: String!
-    classroomId: String!
+    classroomID: String!
+    thumbnail: String!
     issueDate: String!
   }
 
