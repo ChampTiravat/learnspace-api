@@ -7,15 +7,15 @@ export default `
 
   type Classroom {
     _id: String!
-    name: String!
-    description: String!
-    creator: User! 
-    outline: [Outline]!
-    members: [User!]!
-    posts: [Post]!
-    joinRequests: [User]!
-    subject: String!
-    thumbnail: String!
+    name: String
+    description: String
+    creator: User
+    outline: [Outline]
+    members: [User!]
+    posts: [Post]
+    joinRequests: [User]
+    subject: String
+    thumbnail: String
   }
 
   type CreateClassroomResponse {
@@ -25,6 +25,7 @@ export default `
   }
 
   type ClassroomProfileResponse {
+    isMember: Boolean!
     classroom: Classroom
     err: Error
   }
