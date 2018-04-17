@@ -23,7 +23,7 @@ export default async (_, { _id }, { models }) => {
     }
 
     // Query post data
-    const post = await models.Post.findOne({ _id })
+    const post = await models.Post.findOne({ _id }).lean()
 
     // If the post does not exist
     if (!post) {

@@ -32,7 +32,7 @@ export default async (_, { _id }, { models, user }) => {
     const user = await models.User.findOne(
       { _id },
       '_id email fname lname career address username profilePicture'
-    )
+    ).lean()
 
     if (!user) {
       return {

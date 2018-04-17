@@ -46,7 +46,7 @@ export default async (_, { _id }, { models, user }) => {
     // =========================================================
     // Quering a classroom
     // =========================================================
-    const classroom = await models.Classroom.findOne({ _id })
+    const classroom = await models.Classroom.findOne({ _id }).lean()
 
     // =========================================================
     // Quering members of a given classroom
@@ -54,21 +54,21 @@ export default async (_, { _id }, { models, user }) => {
     const classroomMembers = await models.ClassroomMember.find({
       member: user._id,
       classroom: _id
-    })
+    }).lean()
 
     // =========================================================
     // Quering a creator of the classroom
     // =========================================================
     const classroomCreator = await models.User.findOne({
       _id: classroom.creator
-    })
+    }).lean()
 
     // =========================================================
     // Querying posts related to a given classroom
     // =========================================================
     const classroomPosts = await models.Post.find({
       classroom: classroom._id
-    })
+    }).lean()
 
     // =========================================================
     // in case a given classroom does not found

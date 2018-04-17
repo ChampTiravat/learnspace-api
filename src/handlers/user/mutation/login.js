@@ -54,7 +54,7 @@ export default async (_, { email, password }, { models }) => {
       }
     }
 
-    const user = await models.User.findOne({ email })
+    const user = await models.User.findOne({ email }).lean()
 
     if (!user) {
       // User not found

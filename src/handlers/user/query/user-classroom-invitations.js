@@ -39,7 +39,7 @@ export default async (_, { _id }, { models, user }) => {
     // =========================================================
     // Make sure a given user account does exists
     // =========================================================
-    const givenCandidate = await models.User.findOne({ _id })
+    const givenCandidate = await models.User.findOne({ _id }).lean()
     if (!givenCandidate) return formatGraphQLErrorMessage('User not found')
 
     // =========================================================
@@ -50,7 +50,7 @@ export default async (_, { _id }, { models, user }) => {
         candidate: givenCandidate._id
       },
       'classroom createdAt'
-    )
+    ).lean()
 
     // =========================================================
     // Querying the name of each Classroom
@@ -60,7 +60,7 @@ export default async (_, { _id }, { models, user }) => {
         _id: { $in: [...rawInvitations.map(invt => invt.classroom)] }
       },
       '_id name'
-    )
+    ).lean()
 
     // =========================================================
     // GraphQL type and MongoDB collection which represent "Classroom Invitation"
@@ -74,9 +74,7 @@ export default async (_, { _id }, { models, user }) => {
         // We have to find the "name" of the classroom by looking for the classroom
         // that has the same "_id". Then, we just pull-off only the "name" attrib
         // of that classroom object that we found
-        classroomName: cNames.find(
-          n => String(n._id) === String(nextInvt.classroom)
-        ).name
+        classroomName: cNames.find(n => String(n._id) === String(nextInvt.classroom)).name
       }
 
       return totalInvt.concat(mutatedInvt)
