@@ -4,7 +4,9 @@ import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
 import { requiredAuthentication, requireClassroomMember } from '../../../helpers/security-helpers'
 
 const formatGraphQLErrorMessage = message => ({
-  member: false,
+  isMember: false,
+  member: null,
+  classroom: null,
   err: {
     name: 'classroomMembers',
     message
@@ -37,7 +39,7 @@ export default async (_, { classroomID }, { models, user }) => {
     if (!isClassroomMember) return formatGraphQLErrorMessage('Permission Denied')
 
     // Quering a classroom
-    const classroom = await models.Classroom.findOne({ _id: classroomID }, '_id').lean()
+    const classroom = await models.Classroom.findOne({ _id: classroomID }).lean()
 
     // in case a given classroom does not found
     if (!classroom) return formatGraphQLErrorMessage('Classroom not found')
@@ -55,6 +57,8 @@ export default async (_, { classroomID }, { models, user }) => {
     // Return appropriete GraphQL response
     return {
       members: classroomMembers.map(classroomMember => classroomMember.member),
+      isMember: true,
+      classroom,
       err: null
     }
   } catch (err) {

@@ -11,9 +11,7 @@ export default `
     description: String
     creator: User
     outline: [Outline]
-    members: [User!]
     posts: [Post]
-    joinRequests: [User]
     subject: String
     thumbnail: String
   }
@@ -48,6 +46,8 @@ export default `
   }
 
   type ClassroomMembersResponse {
+    isMember: Boolean!
+    classroom: Classroom
     members: [User!]
     err: Error
   }
