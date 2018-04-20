@@ -47,8 +47,14 @@ export default `
     issueDate: String!
   }
 
+  type ClassroomMembersResponse {
+    members: [User!]
+    err: Error
+  }
+
   type Query {
     classroomProfile(_id: String!): ClassroomProfileResponse!
+    classroomMembers(classroomID: String!): ClassroomMembersResponse!
     userClassrooms(_id: String!): UserClassroomsResponse!
   }
 

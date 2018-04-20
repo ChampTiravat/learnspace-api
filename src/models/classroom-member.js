@@ -3,12 +3,12 @@ import mongoose, { Schema } from 'mongoose'
 const ClassroomMemberSchema = new Schema({
   member: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
+    ref: 'users',
     required: true
   },
   classroom: {
     type: Schema.Types.ObjectId,
-    ref: 'Classroom'
+    ref: 'classrooms'
   },
   role: {
     type: String,
