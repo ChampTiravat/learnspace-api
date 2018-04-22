@@ -48,13 +48,20 @@ export default async (_, { classroomID, answer }, { user, models }) => {
       return formatGraphQLErrorMessage('Classroom invitation of a given classroom does not exists')
 
     // 3.2 - If TRUE : Respond to the invitation according to user's "anser"
-    // 3.2.1 - Add the current user to the given classroom as a member
-    await models.ClassroomMember.create({ member: String(user._id), classroom: classroomID })
+    if (equals(answer, 'accept')) {
+      // 3.2.1 - Add the current user to the given classroom as a member
+      await models.ClassroomMember.create({ member: String(user._id), classroom: classroomID })
+    }
 
     // 3.2.2 - Update the classroom invitation status to "accepted" or "refused" According to user's "answer"
-    await models.ClassroomInvitation.update({
-      status: equals(answer, 'accept') ? 'accepted' : 'refused'
-    })
+    await models.ClassroomInvitation.update(
+      {
+        classroom: classroomID
+      },
+      {
+        status: equals(answer, 'accept') ? 'accepted' : 'refused'
+      }
+    )
 
     // 4 - Return an appropriate GraphQL response
     return {
