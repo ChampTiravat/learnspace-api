@@ -23,10 +23,12 @@ export default async (_, { _id }, { models }) => {
     }
 
     // Quering a classroom
-    const classrooms = await models.Classroom.find({ creator: _id }).lean()
+    const classrooms = await models.ClassroomMember.find({ member: _id })
+      .populate('classroom')
+      .lean()
 
     return {
-      classrooms,
+      classrooms: classrooms.map(c => c.classroom),
       err: null
     }
   } catch (err) {
