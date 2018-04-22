@@ -27,8 +27,7 @@ export default async (_, { _id }, { models, user }) => {
     // Authentication
     // =========================================================
     // Make sure user has authorized access
-    if (!requiredAuthentication(user))
-      return formatGraphQLErrorMessage('Authentication Required')
+    if (!requiredAuthentication(user)) return formatGraphQLErrorMessage('Authentication Required')
 
     // =========================================================
     // Input Validation
@@ -47,7 +46,8 @@ export default async (_, { _id }, { models, user }) => {
     // =========================================================
     const rawInvitations = await models.ClassroomInvitation.find(
       {
-        candidate: givenCandidate._id
+        candidate: givenCandidate._id,
+        status: 'waiting'
       },
       'classroom createdAt'
     ).lean()
