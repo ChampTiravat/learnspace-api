@@ -40,6 +40,11 @@ export default `
     err: Error
   }
 
+  type respondToClassroomInvitationResponse {
+    success: Boolean!
+    err: Error
+  }
+
   type Query {
 
       userProfile(_id: String): UserProfileResponse!
@@ -72,6 +77,11 @@ export default `
         career: String,
         address: String 
       ): EditProfileResponse!
+
+      respondToClassroomInvitation(
+        classroomID: String!,
+        answer: String!
+      ): respondToClassroomInvitationResponse!
 
   }
 `
