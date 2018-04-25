@@ -1,9 +1,6 @@
 import jwt from 'jsonwebtoken'
 
-import {
-  verifyToken,
-  generateNewTokensIfExpired
-} from '../helpers/security-helpers'
+import { verifyToken, generateNewTokensIfExpired } from '../helpers/security-helpers'
 
 /**
  * @name extractUserFromToken()
@@ -55,10 +52,9 @@ const extractUserFromToken = async (req, res, next) => {
     }
 
     // If refresh token is valid. Created new access token and refresh token
-    const {
-      newRefreshToken,
-      newAccessToken
-    } = await generateNewTokensIfExpired(userFromRefreshToken)
+    const { newRefreshToken, newAccessToken } = await generateNewTokensIfExpired(
+      userFromRefreshToken
+    )
 
     // and send theme back the the client
     res.set('Access-Control-Expose-Headers', 'x-access-token, x-refresh-token')

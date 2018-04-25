@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken'
 import { isMongoId, isEmpty, trim } from 'validator'
 
-import { SECRET_TOKEN_KEY } from '../config/security-config'
 import { displayErrMessageWhenDev } from './error-helpers'
 import ClassroomMember from '../models/classroom-member'
+import { SECRET_TOKEN_KEY } from '../config'
 
 /** ==================================================================================
  * @name requiredAuthentication()
@@ -114,8 +114,7 @@ export const verifyToken = async token => {
 export const generateToken = async (payload, type) => {
   let token = ''
 
-  if (!payload || payload == null)
-    throw new Error("ERROR: 1st parameter 'payload' not specified!")
+  if (!payload || payload == null) throw new Error("ERROR: 1st parameter 'payload' not specified!")
 
   if (!type || type === '') throw new Error("ERROR: 2nd parameter 'type' not specified!")
 
