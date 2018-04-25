@@ -1,10 +1,7 @@
 import { isEmpty, trim, isMongoId, isEmail, isAlphanumeric } from 'validator'
 
 import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
-import {
-  requiredAuthentication,
-  requiredClassroomAdmin
-} from '../../../helpers/security-helpers'
+import { requiredAuthentication, requiredClassroomAdmin } from '../../../helpers/security-helpers'
 
 const formatGraphQLErrorMessage = message => ({
   success: false,
@@ -32,8 +29,7 @@ export default async (_, { candidateIdent, classroomID }, { models, user }) => {
     // Authentication
     // =========================================================
     // Make sure user has authorized access
-    if (!requiredAuthentication(user))
-      return formatGraphQLErrorMessage('Authentication Required')
+    if (!requiredAuthentication(user)) return formatGraphQLErrorMessage('Authentication Required')
 
     // User must be a classroom administrator
     if (!requiredClassroomAdmin(user, classroomID, models.ClassroomMember))
@@ -51,9 +47,7 @@ export default async (_, { candidateIdent, classroomID }, { models, user }) => {
 
     // Classroom ID must be MongoDB index value
     if (isEmpty(trim(classroomID)) || !isMongoId(classroomID))
-      return formatGraphQLErrorMessage(
-        'Classroom Identification invalid or not specified'
-      )
+      return formatGraphQLErrorMessage('Classroom Identification invalid or not specified')
 
     // =========================================================
     // Make sure a candidate user does exists
@@ -74,8 +68,7 @@ export default async (_, { candidateIdent, classroomID }, { models, user }) => {
       _id: classroomID
     }).lean()
 
-    if (!targetClassroom)
-      return formatGraphQLErrorMessage('A given classroom does not exists')
+    if (!targetClassroom) return formatGraphQLErrorMessage('A given classroom does not exists')
 
     // =========================================================
     // Candidate must not already being a member of a target classroom
@@ -86,9 +79,7 @@ export default async (_, { candidateIdent, classroomID }, { models, user }) => {
     }).lean()
 
     if (memberWithSameCred)
-      return formatGraphQLErrorMessage(
-        'A given candidate is already a member of a given classroom'
-      )
+      return formatGraphQLErrorMessage('A given candidate is already a member of a given classroom')
 
     // =========================================================
     // Do not send an invitation if it's already been sent

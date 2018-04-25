@@ -2,7 +2,7 @@ import { equals, isEmail, isEmpty, trim, isAlphanumeric } from 'validator'
 import bcrypt from 'bcrypt'
 
 import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
-import { ENG_THA_NUM_ALPHA, PASSWORD_PATTERN } from '../../../constants/regex-patterns'
+import { ENG_THA_NUM_ALPHA, PASSWORD_PATTERN } from '../../../constants'
 
 const formatGraphQLErrorMessage = message => ({
   success: false,
@@ -63,9 +63,7 @@ export default async (_, { fname, lname, email, password, username }, { models }
 
     // Password Validation
     if (password.length < 8)
-      return formatGraphQLErrorMessage(
-        'Password is too weak, must be >= 8, but <= 250 characters'
-      )
+      return formatGraphQLErrorMessage('Password is too weak, must be >= 8, but <= 250 characters')
 
     // =========================================================
     // Checking wether user is already exists

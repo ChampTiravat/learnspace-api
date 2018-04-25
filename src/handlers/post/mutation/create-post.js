@@ -1,6 +1,6 @@
 import { isEmpty, trim, isMongoId, equals } from 'validator'
 
-import { ENG_THA_NUM_ALPHA } from '../../../constants/regex-patterns'
+import { ENG_THA_NUM_ALPHA } from '../../../constants'
 
 /** ==================================================================================
  * @name createPost()

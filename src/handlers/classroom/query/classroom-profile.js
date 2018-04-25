@@ -1,10 +1,7 @@
 import { isEmpty, trim, isMongoId } from 'validator'
 
 import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
-import {
-  requiredAuthentication,
-  requireClassroomMember
-} from '../../../helpers/security-helpers'
+import { requiredAuthentication, requireClassroomMember } from '../../../helpers/security-helpers'
 
 const formatGraphQLErrorMessage = message => ({
   isMember: false,
@@ -37,8 +34,7 @@ export default async (_, { _id }, { models, user }) => {
     // Authentication
     // =========================================================
     // Use must be logged-in
-    if (!requiredAuthentication(user))
-      return formatGraphQLErrorMessage('Authentication Required')
+    if (!requiredAuthentication(user)) return formatGraphQLErrorMessage('Authentication Required')
 
     // Check if user is a member of a given classroom or not
     const isClassroomMember = await requireClassroomMember(user, _id)
@@ -115,8 +111,7 @@ export default async (_, { _id }, { models, user }) => {
     // =========================================================
     // in case a classroom creator of a given classroom does not found
     // =========================================================
-    if (!classroomCreator)
-      return formatGraphQLErrorMessage('Classroom creator not found not found')
+    if (!classroomCreator) return formatGraphQLErrorMessage('Classroom creator not found not found')
 
     // =========================================================
     // Return appropriete GraphQL response

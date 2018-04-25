@@ -2,7 +2,7 @@ import { isEmpty, trim, isMongoId } from 'validator'
 
 import { requiredAuthentication } from '../../../helpers/security-helpers'
 import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
-import { ENG_THA_NUM_ALPHA } from '../../../constants/regex-patterns'
+import { ENG_THA_NUM_ALPHA } from '../../../constants'
 
 const formatGraphQLErrorMessage = message => ({
   success: false,
@@ -28,27 +28,18 @@ const formatGraphQLErrorMessage = message => ({
 export default async (_, { name, description, subject }, { user, models }) => {
   try {
     // User must be authenticated
-    if (!requiredAuthentication)
-      return formatGraphQLErrorMessage('Authentication Required')
+    if (!requiredAuthentication) return formatGraphQLErrorMessage('Authentication Required')
 
     // All GraphQL Mutation parameters are required
-    if (
-      isEmpty(trim(name)) ||
-      isEmpty(trim(subject)) ||
-      isEmpty(trim(description))
-    )
-      return formatGraphQLErrorMessage(
-        'Important information should not be empty'
-      )
+    if (isEmpty(trim(name)) || isEmpty(trim(subject)) || isEmpty(trim(description)))
+      return formatGraphQLErrorMessage('Important information should not be empty')
 
     // Validation
     if (!ENG_THA_NUM_ALPHA.test(name))
       return formatGraphQLErrorMessage("'name' is invalid or not specified")
 
     if (!ENG_THA_NUM_ALPHA.test(description))
-      return formatGraphQLErrorMessage(
-        "'description' is invalid or not specified"
-      )
+      return formatGraphQLErrorMessage("'description' is invalid or not specified")
 
     if (!ENG_THA_NUM_ALPHA.test(subject))
       return formatGraphQLErrorMessage("'subject' is invalid or not specified")
