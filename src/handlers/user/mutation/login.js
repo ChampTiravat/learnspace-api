@@ -2,7 +2,7 @@ import { isEmail, isEmpty, trim } from 'validator'
 import bcrypt from 'bcrypt'
 
 import { generateToken } from '../../../helpers/security-helpers'
-import { PASSWORD_PATTERN } from '../../../constants/regex-patterns'
+import { PASSWORD_PATTERN } from '../../../constants'
 
 /** ==================================================================================
  * @name login()
@@ -74,15 +74,9 @@ export default async (_, { email, password }, { models }) => {
 
     if (isPasswordValid) {
       // Password valid
-      const accessToken = await generateToken(
-        { email: user.email, _id: user._id },
-        'accessToken'
-      )
+      const accessToken = await generateToken({ email: user.email, _id: user._id }, 'accessToken')
 
-      const refreshToken = await generateToken(
-        { email: user.email, _id: user._id },
-        'refreshToken'
-      )
+      const refreshToken = await generateToken({ email: user.email, _id: user._id }, 'refreshToken')
 
       return {
         success: true,

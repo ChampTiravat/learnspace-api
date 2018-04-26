@@ -1,17 +1,17 @@
 import mongoose, { Schema } from 'mongoose'
 
+/**
+ * @name ChatroomSchema
+ * @type Mongoose Schema
+ * @desc Chatroom. Holding messages of the members of a particular classroom
+ * @prop { classroom } [ObjectId] : A classroom which the chatroom belongs to
+ */
 const ChatroomSchema = new Schema({
-  parentClassroom: {
+  classroom: {
     type: Schema.Types.ObjectId,
     ref: 'Classroom',
     required: true
-  },
-  message: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'ChatMessage'
-    }
-  ]
+  }
 })
 
 ChatroomSchema.set('redisCache', true)

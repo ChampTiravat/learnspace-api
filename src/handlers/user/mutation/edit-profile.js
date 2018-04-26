@@ -14,11 +14,7 @@ import { requiredAuthentication } from '../../../helpers/security-helpers'
  * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
  * @return GraphQL EditProfileResponse Type
  ================================================================================== */
-export default async (
-  _,
-  { username, fname, lname, career, address },
-  { models }
-) => {
+export default async (_, { username, fname, lname, career, address }, { models }) => {
   try {
     // Authentication : user must be logged-in
     await requiredAuthentication(user)

@@ -1,19 +1,17 @@
 import jwt from 'jsonwebtoken'
 import { isMongoId, isEmpty, trim } from 'validator'
 
-import { SECRET_TOKEN_KEY } from '../config/security-config'
 import { displayErrMessageWhenDev } from './error-helpers'
 import ClassroomMember from '../models/classroom-member'
+import { SECRET_TOKEN_KEY } from '../config'
 
 /** ==================================================================================
  * @name requiredAuthentication()
- * @desc Make sure user have the right permission to access the
- *       particular resource, by verifying their authentication status
- * @param user [GRAPHQL_CONTEXT] : Current user(Javascript Object) extracted from JWT Token since he/she was logged-in
+ * @desc verifying user's authentication status and return TRUE if he/she is authenticated, FALSE otherwise.
+ * @param user [GRAPHQL_CONTEXT] : Current user(Javascript Object) extracted from JWT Token since he/she was logged-in.
  * @return Boolean
  ================================================================================== */
-export const requiredAuthentication = async user =>
-  !user || isEmpty(trim(user._id)) || !isMongoId(user._id) ? false : true
+export const requiredAuthentication = async user => (!user || !isMongoId(user._id) ? false : true)
 
 /** ==================================================================================
  * @name requireClassroomMember()
@@ -76,7 +74,7 @@ export const requiredClassroomAdmin = async (user, classroomID, ClassroomMember)
 
     // return TRUE if user is an admin of a given classroom
     // Other wise FALSE will be returned
-    return isClassroomAdmin ? true : false
+    return !!isClassroomAdmin
   } catch (err) {
     displayErrMessageWhenDev(err)
     return false
@@ -114,8 +112,7 @@ export const verifyToken = async token => {
 export const generateToken = async (payload, type) => {
   let token = ''
 
-  if (!payload || payload == null)
-    throw new Error("ERROR: 1st parameter 'payload' not specified!")
+  if (!payload || payload == null) throw new Error("ERROR: 1st parameter 'payload' not specified!")
 
   if (!type || type === '') throw new Error("ERROR: 2nd parameter 'type' not specified!")
 

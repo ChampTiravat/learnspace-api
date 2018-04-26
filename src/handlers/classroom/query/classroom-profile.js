@@ -1,10 +1,7 @@
 import { isEmpty, trim, isMongoId } from 'validator'
 
+import { requiredAuthentication, requireClassroomMember } from '../../../helpers/security-helpers'
 import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
-import {
-  requiredAuthentication,
-  requireClassroomMember
-} from '../../../helpers/security-helpers'
 
 const formatGraphQLErrorMessage = message => ({
   isMember: false,
@@ -27,42 +24,54 @@ const formatGraphQLErrorMessage = message => ({
  ================================================================================== */
 export default async (_, { _id }, { models, user }) => {
   try {
-    // =========================================================
+    // ---------------------------------------------------------------------
     // Input Validation
-    // =========================================================
+    // ---------------------------------------------------------------------
     if (isEmpty(trim(_id)) || !isMongoId(_id))
       return formatGraphQLErrorMessage('Classroom ID invalid or not specified')
 
-    // =========================================================
+    // ---------------------------------------------------------------------
     // Authentication
-    // =========================================================
+    // ---------------------------------------------------------------------
     // Use must be logged-in
-    if (!requiredAuthentication(user))
-      return formatGraphQLErrorMessage('Authentication Required')
+    const isLogin = await requiredAuthentication(user)
+    if (!isLogin) return formatGraphQLErrorMessage('Authentication Required')
 
+    // ---------------------------------------------------------------------
     // Check if user is a member of a given classroom or not
+    // ---------------------------------------------------------------------
     const isClassroomMember = await requireClassroomMember(user, _id)
 
+    // ---------------------------------------------------------------------
     // If user is NOT a member of a given classroom
+    // ---------------------------------------------------------------------
     if (!isClassroomMember) {
+      // ---------------------------------------------------------------------
       // Query a given classroom for a preview. Because the user is
       // not a member of the classroom. So, we will only show a brief info
       // about the classroom
+      // ---------------------------------------------------------------------
       const classroom = await models.Classroom.findOne(
         { _id },
         'name creator subject thumbnail description'
       ).lean()
 
+      // ---------------------------------------------------------------------
       // If a given classroom does not exist
+      // ---------------------------------------------------------------------
       if (!classroom) return formatGraphQLErrorMessage('Classroom not found')
 
+      // ---------------------------------------------------------------------
       // Query the creator of a given classroom
+      // ---------------------------------------------------------------------
       const classroomCreator = await models.User.findOne(
         { _id: classroom.creator },
         'fname lname'
       ).lean()
 
+      // ---------------------------------------------------------------------
       // Return GraphQL response with a limit of the classroom information
+      // ---------------------------------------------------------------------
       return {
         isMember: false,
         classroom: {
@@ -80,47 +89,46 @@ export default async (_, { _id }, { models, user }) => {
       }
     }
 
-    // =========================================================
+    // ---------------------------------------------------------------------
     // Quering a classroom
-    // =========================================================
+    // ---------------------------------------------------------------------
     const classroom = await models.Classroom.findOne({ _id }).lean()
 
-    // =========================================================
+    // ---------------------------------------------------------------------
     // Quering members of a given classroom
-    // =========================================================
+    // ---------------------------------------------------------------------
     const classroomMembers = await models.ClassroomMember.find({
       member: user._id,
       classroom: _id
     }).lean()
 
-    // =========================================================
+    // ---------------------------------------------------------------------
     // Quering a creator of the classroom
-    // =========================================================
+    // ---------------------------------------------------------------------
     const classroomCreator = await models.User.findOne({
       _id: classroom.creator
     }).lean()
 
-    // =========================================================
+    // ---------------------------------------------------------------------
     // Querying posts related to a given classroom
-    // =========================================================
+    // ---------------------------------------------------------------------
     const classroomPosts = await models.Post.find({
       classroom: classroom._id
     }).lean()
 
-    // =========================================================
-    // in case a given classroom does not found
-    // =========================================================
+    // ---------------------------------------------------------------------
+    // In case a given classroom does not found
+    // ---------------------------------------------------------------------
     if (!classroom) return formatGraphQLErrorMessage('Classroom not found')
 
-    // =========================================================
-    // in case a classroom creator of a given classroom does not found
-    // =========================================================
-    if (!classroomCreator)
-      return formatGraphQLErrorMessage('Classroom creator not found not found')
+    // ---------------------------------------------------------------------
+    // In case a classroom creator of a given classroom does not found
+    // ---------------------------------------------------------------------
+    if (!classroomCreator) return formatGraphQLErrorMessage('Classroom creator not found not found')
 
-    // =========================================================
+    // ---------------------------------------------------------------------
     // Return appropriete GraphQL response
-    // =========================================================
+    // ---------------------------------------------------------------------
     return {
       isMember: true,
       classroom: {

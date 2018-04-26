@@ -1,28 +1,44 @@
 import { isEmpty, trim, isMongoId } from 'validator'
 
+import { requiredAuthentication } from '../../../helpers/security-helpers'
+import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
+
+const formatGraphQLErrorMessage = message => ({
+  classrooms: [],
+  err: {
+    name: 'userClassroom',
+    message
+  }
+})
+
 /** ==================================================================================
  * @name userClassrooms()
  * @type resolver
  * @desc Send the classrooms corresponding to a given user
  * @param parent : default parameter from ApolloServer
  * @param { _id } [GRAPHQL_ARGS] : User ID
+ * @param { user } [GRAPHQL_CONTEXT] : Currnet logged-in user(extracted from JWT token)
  * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
  * @return Object : GraphQL UserClassroomsResponse Type
  ================================================================================== */
-export default async (_, { _id }, { models }) => {
+export default async (_, { _id }, { user, models }) => {
   try {
-    // Input Validation
-    if (isEmpty(trim(_id)) || !isMongoId(_id)) {
-      return {
-        classrooms: [],
-        err: {
-          name: 'classroom',
-          message: 'User ID invalid or not specified'
-        }
-      }
-    }
+    // ---------------------------------------------------------------------
+    // Authentication
+    // ---------------------------------------------------------------------
+    // Use must be logged-in
+    const isLogin = await requiredAuthentication(user)
+    if (!isLogin) return formatGraphQLErrorMessage('Authentication Required')
 
+    // ---------------------------------------------------------------------
+    // Input Validation
+    // ---------------------------------------------------------------------
+    if (isEmpty(trim(_id)) || !isMongoId(_id))
+      return formatGraphQLErrorMessage('User ID invalid or not specified')
+
+    // ---------------------------------------------------------------------
     // Quering a classroom
+    // ---------------------------------------------------------------------
     const classrooms = await models.ClassroomMember.find({ member: _id })
       .populate('classroom')
       .lean()
@@ -32,12 +48,7 @@ export default async (_, { _id }, { models }) => {
       err: null
     }
   } catch (err) {
-    return {
-      classrooms: [],
-      err: {
-        name: 'classroom',
-        message: 'Server Error'
-      }
-    }
+    displayErrMessageWhenDev(err)
+    return formatGraphQLErrorMessage('Server Error')
   }
 }
