@@ -74,7 +74,7 @@ export const requiredClassroomAdmin = async (user, classroomID, ClassroomMember)
 
     // return TRUE if user is an admin of a given classroom
     // Other wise FALSE will be returned
-    return isClassroomAdmin ? true : false
+    return !!isClassroomAdmin
   } catch (err) {
     displayErrMessageWhenDev(err)
     return false
