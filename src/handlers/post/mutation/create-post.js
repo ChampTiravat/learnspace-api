@@ -1,6 +1,17 @@
 import { isEmpty, trim, isMongoId, equals } from 'validator'
 
+import { requiredAuthentication, requiredClassroomAdmin } from '../../../helpers/security-helpers'
+import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
 import { ENG_THA_NUM_ALPHA } from '../../../constants'
+
+const formatGraphQLErrorMessage = message => ({
+  success: false,
+  post: null,
+  err: {
+    name: 'createPost',
+    message
+  }
+})
 
 /** ==================================================================================
  * @name createPost()
@@ -17,82 +28,45 @@ import { ENG_THA_NUM_ALPHA } from '../../../constants'
  ================================================================================== */
 export default async (_, { classroomID, title, recipe, isPublic }, { models, user }) => {
   try {
+    // ---------------------------------------------------------------------
+    // Authentication
+    // ---------------------------------------------------------------------
+    // Make sure user has authorized access
+    const isLogin = await requiredAuthentication(user)
+    if (!isLogin) return formatGraphQLErrorMessage('Authentication Required')
+
+    // ---------------------------------------------------------------------
     // Validation
-    if (isEmpty(trim(classroomID)) || isEmpty(trim(recipe)) || isEmpty(trim(title))) {
-      return {
-        success: false,
-        post: null,
-        err: {
-          name: 'createPost',
-          message: 'Important information not provided or invalid'
-        }
-      }
-    }
+    // ---------------------------------------------------------------------
+    if (isEmpty(trim(classroomID)) || isEmpty(trim(recipe)) || isEmpty(trim(title)))
+      return formatGraphQLErrorMessage('Important information not provided or invalid')
 
-    if (!isMongoId(classroomID)) {
-      return {
-        success: false,
-        post: null,
-        err: {
-          name: 'createPost',
-          message: 'ClassroomID invalid'
-        }
-      }
-    }
+    // classroomID must be mongoDB ObjectId
+    if (!isMongoId(classroomID)) return formatGraphQLErrorMessage('ClassroomID invalid')
 
-    if (!ENG_THA_NUM_ALPHA.test(title)) {
-      return {
-        success: false,
-        post: null,
-        err: {
-          name: 'createPost',
-          message: 'Post title invalid'
-        }
-      }
-    }
+    if (!ENG_THA_NUM_ALPHA.test(title)) return formatGraphQLErrorMessage('Post title invalid')
 
-    // Checking the post creator is a current logged-in user or not?
-    console.log(user)
-    if (!user || isEmpty(user._id)) {
-      return {
-        success: false,
-        post: null,
-        err: {
-          name: 'createPost',
-          message: 'Unauthorized Access'
-        }
-      }
-    }
-
-    // Checking classroom is exists?
-    const targetClassroom = await models.Classroom.findOne({
-      _id: classroomID
-    }).lean()
-
-    if (!targetClassroom) {
-      return {
-        success: false,
-        post: null,
-        err: {
-          name: 'createPost',
-          message: 'Given classroom does not exist'
-        }
-      }
-    }
-
+    // ---------------------------------------------------------------------
     // Checking the current user is classroom supervisor(creator)
-    if (!equals(user._id, String(targetClassroom.creator))) {
-      return {
-        success: false,
-        post: null,
-        err: {
-          name: 'createPost',
-          message: 'Only classroom creator should be able to create a post'
-        }
-      }
-    }
+    // ---------------------------------------------------------------------
+    const isClassroomAdmin = await requiredClassroomAdmin(user, classroomID, models.ClassroomMember)
+    if (!isClassroomAdmin) return formatGraphQLErrorMessage('Unauthorized Access')
 
+    // ---------------------------------------------------------------------
+    // Checking classroom is exists?
+    // ---------------------------------------------------------------------
+    const targetClassroom = await models.Classroom.findOne(
+      {
+        _id: classroomID
+      },
+      '_id'
+    ).lean()
+
+    if (!targetClassroom) return formatGraphQLErrorMessage('Given classroom does not exist')
+
+    // ---------------------------------------------------------------------
     // Create and saving new post
+    // ---------------------------------------------------------------------
     const newPost = await models.Post.create({
       title,
       recipe,
@@ -101,20 +75,16 @@ export default async (_, { classroomID, title, recipe, isPublic }, { models, use
       classroom: targetClassroom._id
     })
 
+    // ---------------------------------------------------------------------
+    // Return appropriete GraphQL response
+    // ---------------------------------------------------------------------
     return {
       success: true,
       post: newPost,
       err: null
     }
   } catch (err) {
-    console.log(err)
-    return {
-      success: false,
-      post: null,
-      err: {
-        name: 'createPost',
-        message: 'Server error'
-      }
-    }
+    displayErrMessageWhenDev(err)
+    return formatGraphQLErrorMessage('Server Error')
   }
 }
