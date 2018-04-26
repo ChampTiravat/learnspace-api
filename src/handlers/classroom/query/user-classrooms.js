@@ -17,10 +17,11 @@ const formatGraphQLErrorMessage = message => ({
  * @desc Send the classrooms corresponding to a given user
  * @param parent : default parameter from ApolloServer
  * @param { _id } [GRAPHQL_ARGS] : User ID
+ * @param { user } [GRAPHQL_CONTEXT] : Currnet logged-in user(extracted from JWT token)
  * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
  * @return Object : GraphQL UserClassroomsResponse Type
  ================================================================================== */
-export default async (_, { _id }, { models }) => {
+export default async (_, { _id }, { user, models }) => {
   try {
     // ---------------------------------------------------------------------
     // Authentication
