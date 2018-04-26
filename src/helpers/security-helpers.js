@@ -7,13 +7,11 @@ import { SECRET_TOKEN_KEY } from '../config'
 
 /** ==================================================================================
  * @name requiredAuthentication()
- * @desc Make sure user have the right permission to access the
- *       particular resource, by verifying their authentication status
- * @param user [GRAPHQL_CONTEXT] : Current user(Javascript Object) extracted from JWT Token since he/she was logged-in
+ * @desc verifying user's authentication status and return TRUE if he/she is authenticated, FALSE otherwise.
+ * @param user [GRAPHQL_CONTEXT] : Current user(Javascript Object) extracted from JWT Token since he/she was logged-in.
  * @return Boolean
  ================================================================================== */
-export const requiredAuthentication = async user =>
-  !user || isEmpty(trim(user._id)) || !isMongoId(user._id) ? false : true
+export const requiredAuthentication = async user => (!user || !isMongoId(user._id) ? false : true)
 
 /** ==================================================================================
  * @name requireClassroomMember()
