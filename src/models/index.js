@@ -9,10 +9,14 @@ import Comment from './comment'
 import User from './user'
 import Post from './post'
 
-// We'll pass this object contains every available models
-// to the GraphQL Context. So, we can use these models
-// directly through our resolver's context object, without
-// importing these models one by one
+/*
+
+ We'll pass this object contains every available models
+ to the GraphQL Context. So, we can use these models
+ directly through our resolver's context object, without
+ importing these models one by one
+
+*/
 const models = {
   ClassroomInvitation,
   ClassroomMember,

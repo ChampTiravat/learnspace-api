@@ -1,5 +1,15 @@
 import mongoose, { Schema } from 'mongoose'
 
+/**
+ * @name CommentSchema
+ * @type Mongoose Schema
+ * @desc Post's comment message
+ * @prop { creator } ObjectId: Creator of the comment message
+ * @prop { message } String : Body of the comment message
+ * @prop { post } ObjectI : Parent post which the comment message belongs to
+ * @prop { createdAt } Date : Date when this comment message was created
+ * @prop { updatedAt } Date : Lasted date when the message of the comment message has been updated
+ */
 const CommentSchema = new Schema({
   creator: {
     type: Schema.Types.ObjectId,
@@ -11,16 +21,10 @@ const CommentSchema = new Schema({
     required: true,
     trim: true
   },
-  parentPost: {
+  post: {
     type: Schema.Types.ObjectId,
     ref: 'Post'
   },
-  subComments: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: 'SubComment'
-    }
-  ],
   createdAt: { type: Date, default: Date.now() },
   updatedAt: { type: Date, default: Date.now() }
 })
