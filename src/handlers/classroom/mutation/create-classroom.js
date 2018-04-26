@@ -27,14 +27,21 @@ const formatGraphQLErrorMessage = message => ({
  ================================================================================== */
 export default async (_, { name, description, subject }, { user, models }) => {
   try {
+    // ---------------------------------------------------------------------
     // User must be authenticated
-    if (!requiredAuthentication) return formatGraphQLErrorMessage('Authentication Required')
+    // ---------------------------------------------------------------------
+    const isLogin = await requiredAuthentication(user)
+    if (!isLogin) return formatGraphQLErrorMessage('Authentication Required')
 
+    // ---------------------------------------------------------------------
     // All GraphQL Mutation parameters are required
+    // ---------------------------------------------------------------------
     if (isEmpty(trim(name)) || isEmpty(trim(subject)) || isEmpty(trim(description)))
       return formatGraphQLErrorMessage('Important information should not be empty')
 
+    // ---------------------------------------------------------------------
     // Validation
+    // ---------------------------------------------------------------------
     if (!ENG_THA_NUM_ALPHA.test(name))
       return formatGraphQLErrorMessage("'name' is invalid or not specified")
 
@@ -44,7 +51,9 @@ export default async (_, { name, description, subject }, { user, models }) => {
     if (!ENG_THA_NUM_ALPHA.test(subject))
       return formatGraphQLErrorMessage("'subject' is invalid or not specified")
 
+    // ---------------------------------------------------------------------
     // New Classroom Construction
+    // ---------------------------------------------------------------------
     const newClassroom = await models.Classroom.create({
       name,
       subject,
@@ -52,8 +61,9 @@ export default async (_, { name, description, subject }, { user, models }) => {
       creator: user._id
     })
 
-    // Add user(current user who created the classroom above)
-    // as a member of the classroom
+    // ---------------------------------------------------------------------
+    // Add user(current user who created the classroom above) as a member of the classroom
+    // ---------------------------------------------------------------------
     await models.ClassroomMember.create({
       classroom: newClassroom._id,
       member: user._id,
