@@ -1,19 +1,19 @@
-import login from '../handlers/user/mutation/login'
+import respondToClassroomInvitation from '../handlers/user/mutation/respond-to-classroom-invitation'
+import userClassroomInvitations from '../handlers/user/query/user-classroom-invitations'
+import userProfile from '../handlers/user/query/user-profile'
 import register from '../handlers/user/mutation/register'
 import editProfile from '../handlers/user/mutation/login'
-import userProfile from '../handlers/user/query/user-profile'
-import userClassroomInvitations from '../handlers/user/query/user-classroom-invitations'
-import respondToClassroomInvitation from '../handlers/user/mutation/respond-to-classroom-invitation'
+import login from '../handlers/user/mutation/login'
 
 export default {
   Query: {
-    userProfile,
-    userClassroomInvitations
+    userClassroomInvitations,
+    userProfile
   },
   Mutation: {
-    login,
-    register,
+    respondToClassroomInvitation,
     editProfile,
-    respondToClassroomInvitation
+    register,
+    login
   }
 }
