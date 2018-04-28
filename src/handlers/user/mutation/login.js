@@ -1,8 +1,19 @@
 import { isEmail, isEmpty, trim } from 'validator'
 import bcrypt from 'bcrypt'
 
+import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
 import { generateToken } from '../../../helpers/security-helpers'
 import { PASSWORD_PATTERN } from '../../../constants'
+
+const formatGraphQLErrorMessage = message => ({
+  success: false,
+  user: null,
+  token: '',
+  err: {
+    name: 'login',
+    message
+  }
+})
 
 /** ==================================================================================
  * @name login()
@@ -16,66 +27,36 @@ import { PASSWORD_PATTERN } from '../../../constants'
  ================================================================================== */
 export default async (_, { email, password }, { models }) => {
   try {
+    // ---------------------------------------------------------------------
     // Inputs Validation
-    if (isEmpty(trim(email)) || isEmpty(trim(password))) {
-      return {
-        success: false,
-        user: null,
-        token: '',
-        err: {
-          name: 'login',
-          message: 'Email or Password not specified'
-        }
-      }
-    }
+    // ---------------------------------------------------------------------
+    if (isEmpty(trim(email)) || isEmpty(trim(password)))
+      return formatGraphQLErrorMessage('Email or Password not specified')
 
-    if (!isEmail(email) || email.length > 250) {
-      return {
-        success: false,
-        token: '',
-        user: null,
-        err: {
-          name: 'login',
-          message: 'Email is not valid'
-        }
-      }
-    }
+    if (!isEmail(email) || email.length > 250)
+      return formatGraphQLErrorMessage('Email is not valid')
 
-    // Password may contain anything and must have
-    // a length between 8 - 55 characters
-    if (!PASSWORD_PATTERN.test(password) || password.length > 55) {
-      return {
-        success: false,
-        user: null,
-        err: {
-          name: 'login',
-          message: 'Password is not valid'
-        }
-      }
-    }
+    // ---------------------------------------------------------------------
+    // Password may contain anything and must have a length between 8 - 55 characters
+    // ---------------------------------------------------------------------
+    if (!PASSWORD_PATTERN.test(password) || password.length > 55)
+      return formatGraphQLErrorMessage('Password is not valid')
 
+    // ---------------------------------------------------------------------
+    // If user does not exists
+    // ---------------------------------------------------------------------
     const user = await models.User.findOne({ email }).lean()
+    if (!user) return formatGraphQLErrorMessage('Invalid Credentials')
 
-    if (!user) {
-      // User not found
-      return {
-        success: false,
-        token: '',
-        user: null,
-        err: {
-          name: 'login',
-          message: 'Invalid Credentials'
-        }
-      }
-    }
-
+    // ---------------------------------------------------------------------
     // Compare the password
+    // ---------------------------------------------------------------------
     const isPasswordValid = await bcrypt.compareSync(password, user.password)
-
     if (isPasswordValid) {
+      // ---------------------------------------------------------------------
       // Password valid
+      // ---------------------------------------------------------------------
       const accessToken = await generateToken({ email: user.email, _id: user._id }, 'accessToken')
-
       const refreshToken = await generateToken({ email: user.email, _id: user._id }, 'refreshToken')
 
       return {
@@ -85,26 +66,13 @@ export default async (_, { email, password }, { models }) => {
         user
       }
     } else {
-      // Invalid Password
-      return {
-        success: false,
-        user: null,
-        token: '',
-        err: {
-          name: 'login',
-          message: 'Invalid Credentials'
-        }
-      }
+      // ---------------------------------------------------------------------
+      // If password is invalid
+      // ---------------------------------------------------------------------
+      return formatGraphQLErrorMessage('Invalid Credentials')
     }
   } catch (err) {
-    return {
-      success: false,
-      user: null,
-      token: '',
-      err: {
-        name: 'login',
-        message: 'Server Error'
-      }
-    }
+    displayErrMessageWhenDev(err)
+    return formatGraphQLErrorMessage('Server Error')
   }
 }
