@@ -1,5 +1,16 @@
 import { isEmpty, trim, isMongoId } from 'validator'
 
+import { requiredAuthentication, requiredClassroomMember } from '../../../helpers/security-helpers'
+import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
+
+const formatGraphQLErrorMessage = message => ({
+  post: null,
+  err: {
+    name: 'getPost',
+    message
+  }
+})
+
 /** ==================================================================================
  * @name getPost()
  * @type resolver
@@ -11,43 +22,40 @@ import { isEmpty, trim, isMongoId } from 'validator'
  ================================================================================== */
 export default async (_, { _id }, { models }) => {
   try {
+    // ---------------------------------------------------------------------
     // Input Validation
-    if (isEmpty(trim(_id)) || !isMongoId(_id)) {
-      return {
-        posts: null,
-        err: {
-          name: 'getPost',
-          message: 'post ID is invalid'
-        }
-      }
-    }
+    // ---------------------------------------------------------------------
+    if (isEmpty(trim(_id)) || !isMongoId(_id))
+      return formatGraphQLErrorMessage('post ID is invalid')
 
-    // Query post data
-    const post = await models.Post.findOne({ _id }).lean()
+    // ---------------------------------------------------------------------
+    // Authentication
+    // ---------------------------------------------------------------------
+    // Make sure user has authorized access
+    const isLogin = await requiredAuthentication(user)
+    if (!isLogin) return formatGraphQLErrorMessage('Authentication Required')
 
+    // ---------------------------------------------------------------------
     // If the post does not exist
-    if (!post) {
-      return {
-        post: null,
-        err: {
-          name: 'getPost',
-          message: 'The post does not exist'
-        }
-      }
-    }
+    // ---------------------------------------------------------------------
+    const post = await models.Post.findOne({ _id }).lean()
+    if (!post) return formatGraphQLErrorMessage('The post does not exist')
 
+    // ---------------------------------------------------------------------
+    // Checking the current user is classroom member
+    // ---------------------------------------------------------------------
+    const isClassroomMember = await requiredClassroomAdmin(user, String(post.classroom))
+    if (!isClassroomMember) return formatGraphQLErrorMessage('Unauthorized Access')
+
+    // ---------------------------------------------------------------------
+    // Return appropriete GraphQL response
+    // ---------------------------------------------------------------------
     return {
       post,
       err: null
     }
   } catch (err) {
-    // Some error occured
-    return {
-      post: null,
-      err: {
-        name: 'getPost',
-        message: 'Server Error'
-      }
-    }
+    displayErrMessageWhenDev(err)
+    return formatGraphQLErrorMessage('Server Error')
   }
 }
