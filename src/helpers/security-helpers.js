@@ -11,7 +11,17 @@ import { SECRET_TOKEN_KEY } from '../config'
  * @param user [GRAPHQL_CONTEXT] : Current user(Javascript Object) extracted from JWT Token since he/she was logged-in.
  * @return Boolean
  ================================================================================== */
-export const requiredAuthentication = async user => (!user || !isMongoId(user._id) ? false : true)
+export const requiredAuthentication = async user => {
+  try {
+    // Return TRUE if
+    //  "user" object exists AND has a property named "_id" AND "_id" is MongoDB ObjectId
+    // otherwise return FALSE
+    return user && user._id != '' && isMongoId(user._id) ? true : false
+  } catch (err) {
+    displayErrMessageWhenDev(err)
+    return false
+  }
+}
 
 /** ==================================================================================
  * @name requireClassroomMember()
@@ -20,7 +30,7 @@ export const requiredAuthentication = async user => (!user || !isMongoId(user._i
  * @param classroomID [GRAPHQL_ARGS] : Classroom ID.
  * @param user [GRAPHQL_CONTEXT] : Current user extracted from JWT Token since he/she was logged-in.
  ================================================================================== */
-export const requireClassroomMember = async (user, classroomID) => {
+export const requiredClassroomMember = async (user, classroomID) => {
   try {
     const userID = String(user._id)
     const classID = String(classroomID)
