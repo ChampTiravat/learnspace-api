@@ -20,7 +20,7 @@ const formatGraphQLErrorMessage = message => ({
  * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
  * @return Object : GraphQL GetPostResponse Type
  ================================================================================== */
-export default async (_, { _id }, { models }) => {
+export default async (_, { _id }, { models, user }) => {
   try {
     // ---------------------------------------------------------------------
     // Input Validation
@@ -44,7 +44,7 @@ export default async (_, { _id }, { models }) => {
     // ---------------------------------------------------------------------
     // Checking the current user is classroom member
     // ---------------------------------------------------------------------
-    const isClassroomMember = await requiredClassroomAdmin(user, String(post.classroom))
+    const isClassroomMember = await requiredClassroomMember(user, String(post.classroom))
     if (!isClassroomMember) return formatGraphQLErrorMessage('Unauthorized Access')
 
     // ---------------------------------------------------------------------

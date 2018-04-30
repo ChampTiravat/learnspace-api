@@ -1,6 +1,6 @@
 import { isEmpty, trim, isMongoId } from 'validator'
 
-import { requiredAuthentication, requireClassroomMember } from '../../../helpers/security-helpers'
+import { requiredAuthentication, requiredClassroomMember } from '../../../helpers/security-helpers'
 import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
 
 const formatGraphQLErrorMessage = message => ({
@@ -40,7 +40,7 @@ export default async (_, { classroomID }, { models, user }) => {
     // ---------------------------------------------------------------------
     // Check if user is a member of a given classroom or not
     // ---------------------------------------------------------------------
-    const isClassroomMember = await requireClassroomMember(user, classroomID)
+    const isClassroomMember = await requiredClassroomMember(user, classroomID)
 
     // If user is NOT a member of a given classroom
     if (!isClassroomMember) return formatGraphQLErrorMessage('Permission Denied')
