@@ -1,6 +1,6 @@
 import { isEmpty, trim, isMongoId } from 'validator'
 
-import { requiredAuthentication } from '../../..//helpers/security-helpers'
+import { requiredAuthentication } from '../../../helpers/security-helpers'
 import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
 
 const formatGraphQLErrorMessage = message => ({
@@ -21,7 +21,7 @@ const formatGraphQLErrorMessage = message => ({
  * @param { models } [GRAPHQL_CONTEXT] : Mongoose Model
  * @return Object : GraphQL UserProfileResponse Type
  ================================================================================== */
-export default async (_, { _id }, { models, user }) => {
+export default async (_, { _id }, { user, models }) => {
   try {
     // ---------------------------------------------------------------------
     // Authentication
@@ -38,18 +38,18 @@ export default async (_, { _id }, { models, user }) => {
     // ---------------------------------------------------------------------
     // If user does not exists
     // ---------------------------------------------------------------------
-    const user = await models.User.findOne(
+    const givenUser = await models.User.findOne(
       { _id },
       '_id email fname lname career address username profilePicture'
     ).lean()
 
-    if (!user) return formatGraphQLErrorMessage('User not found')
+    if (!givenUser) return formatGraphQLErrorMessage('User not found')
 
     // ---------------------------------------------------------------------
     // Return appropriete GraphQL response
     // ---------------------------------------------------------------------
     return {
-      user,
+      user: givenUser,
       err: null
     }
   } catch (err) {
