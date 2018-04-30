@@ -38,7 +38,13 @@ export default async (_, { _id }, { models, user }) => {
     // ---------------------------------------------------------------------
     // If the post does not exist
     // ---------------------------------------------------------------------
-    const post = await models.Post.findOne({ _id }).lean()
+    const post = await models.Post.findOne(
+      { _id },
+      '_id title creator recipe comments classroom isPublic createdAt updatedAt'
+    )
+      .populate('comments')
+      .lean()
+
     if (!post) return formatGraphQLErrorMessage('The post does not exist')
 
     // ---------------------------------------------------------------------

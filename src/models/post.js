@@ -11,6 +11,7 @@ import mongoose, { Schema } from 'mongoose'
  * @prop { isPublic } boolean : By default, every post is only restricted and available for classroom members
  * @prop { creator } objectid : User who created the post
  * @prop { classroom } objectid : Classroom which the post belongs to
+ * @prop { comments } [objectid] : Comments which belong to a particular post. Represented as an array of Comment Schemas
  * @prop { createdAt } date : Date when the post was created
  * @prop { updatedAt } date : Date when the post's information have beend updated
  */
@@ -34,6 +35,13 @@ const PostSchema = new Schema({
     ref: 'Classroom',
     required: true
   },
+  comments: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'comments',
+      required: true
+    }
+  ],
 
   createdAt: { type: Date, default: Date.now() },
   updatedAt: { type: Date, default: Date.now() }
