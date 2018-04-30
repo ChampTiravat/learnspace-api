@@ -7,6 +7,8 @@ export default `
         recipe: String!
         comments: [Comment]!
         isPublic: Boolean!
+        createdAt: String
+        updatedAt: String
     }
 
     type ClassroomPostsResponse {
