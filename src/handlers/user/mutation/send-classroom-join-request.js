@@ -30,9 +30,12 @@ export default async (_, { classroomID }, { models, user }) => {
     const isLogin = await requiredAuthentication(user)
     if (!isLogin) return formatGraphQLErrorMessage('Authentication Required')
 
-    // User must be a classroom administrator
+    // User must NOT already being a classroom administrator
     const isClassroomMember = await requiredClassroomMember(user, classroomID)
-    if (!isClassroomMember) return formatGraphQLErrorMessage('Permission Denied')
+    if (isClassroomMember)
+      return formatGraphQLErrorMessage(
+        'Candidate user must not already being a member of a given classroom'
+      )
 
     // ---------------------------------------------------------------------
     // Inputs Validation
