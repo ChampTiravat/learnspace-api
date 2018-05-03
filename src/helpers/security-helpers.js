@@ -34,7 +34,6 @@ export const requiredClassroomMember = async (user, classroomID) => {
   try {
     const userID = String(user._id)
     const classID = String(classroomID)
-    console.log(userID, classID)
 
     // In case the user ID was not provided. This means user is not authenticated.
     if (isEmpty(trim(userID)) || !isMongoId(userID)) {
