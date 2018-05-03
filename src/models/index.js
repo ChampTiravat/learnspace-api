@@ -1,3 +1,4 @@
+import ClassroomJoinRequest from './classroom-join-request'
 import ClassroomInvitation from './classroom-invitation'
 import ClassroomMember from './classroom-member'
 import Notification from './notification'
@@ -18,6 +19,7 @@ import Post from './post'
 
 */
 const models = {
+  ClassroomJoinRequest,
   ClassroomInvitation,
   ClassroomMember,
   Notification,
