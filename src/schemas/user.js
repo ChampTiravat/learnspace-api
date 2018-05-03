@@ -45,6 +45,11 @@ export default `
     err: Error
   }
 
+  type sendClassroomJoinRequestResponse {
+    success: Boolean!
+    err: Error
+  }
+
   type Query {
 
       userProfile(_id: String): UserProfileResponse!
@@ -83,5 +88,8 @@ export default `
         answer: String!
       ): respondToClassroomInvitationResponse!
 
+      sendClassroomJoinRequest(
+        classroomID: String!
+      ): sendClassroomJoinRequestResponse!
   }
 `

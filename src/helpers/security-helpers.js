@@ -48,11 +48,11 @@ export const requiredClassroomMember = async (user, classroomID) => {
     // Checking wether user is a member of the given classroom or not.
     const isMember = await ClassroomMember.findOne({
       member: userID,
-      classroom: classroomID
+      classroom: classID
     })
 
     // Return TRUE, if a given user is a member of a given classroom. Otherwise, return FALSE.
-    return !!isMember
+    return isMember ? true : false
   } catch (err) {
     displayErrMessageWhenDev(err)
     return false
