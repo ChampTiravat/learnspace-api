@@ -29,6 +29,6 @@ Learnspace is a learning management system(LMS) originally built to enhance the 
   * Apollo Client
   * PWA Enhancement
 
-- Deployment
+- Tools
   * Docker
   - Yarn
