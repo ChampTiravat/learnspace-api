@@ -5,6 +5,7 @@ import { displayErrMessageWhenDev } from '../../../helpers/error-helpers'
 
 const formatGraphQLErrorMessage = message => ({
   isMember: false,
+  didJoinReqSent: false,
   classroom: null,
   err: {
     name: 'classroom',
@@ -70,10 +71,23 @@ export default async (_, { _id }, { models, user }) => {
       ).lean()
 
       // ---------------------------------------------------------------------
+      // Check if the user already sent a join-request to the given classroom
+      // ---------------------------------------------------------------------
+      const classroomJoinReqFromUser = await models.ClassroomJoinRequest.findOne(
+        {
+          classroom: classroom._id,
+          candidate: String(user._id),
+          status: 'waiting'
+        },
+        'candidate'
+      ).lean()
+
+      // ---------------------------------------------------------------------
       // Return GraphQL response with a limit of the classroom information
       // ---------------------------------------------------------------------
       return {
         isMember: false,
+        didJoinReqSent: !!classroomJoinReqFromUser,
         classroom: {
           _id: classroom._id,
           name: classroom.name,
@@ -127,10 +141,23 @@ export default async (_, { _id }, { models, user }) => {
     if (!classroomCreator) return formatGraphQLErrorMessage('Classroom creator not found not found')
 
     // ---------------------------------------------------------------------
+    // Check if the user already sent a join-request to the given classroom
+    // ---------------------------------------------------------------------
+    const classroomJoinReqFromUser = await models.ClassroomJoinRequest.findOne(
+      {
+        classroom: classroom._id,
+        candidate: String(user._id),
+        status: 'waiting'
+      },
+      'candidate'
+    ).lean()
+
+    // ---------------------------------------------------------------------
     // Return appropriete GraphQL response
     // ---------------------------------------------------------------------
     return {
       isMember: true,
+      didJoinReqSent: !!classroomJoinReqFromUser,
       classroom: {
         _id: classroom._id,
         name: classroom.name,
@@ -142,7 +169,6 @@ export default async (_, { _id }, { models, user }) => {
         outline: [
           { title: 'Explain course outline', passed: true },
           { title: 'Calculus and Analytic Geometry', passed: true },
-          { title: 'Getting started with Python programming', passed: true },
           { title: 'Data Structures and Algorithms', passed: false },
           { title: 'Final Project', passed: false },
           { title: 'Examination', passed: false }

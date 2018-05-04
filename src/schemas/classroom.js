@@ -24,6 +24,7 @@ export default `
 
   type ClassroomProfileResponse {
     isMember: Boolean!
+    didJoinReqSent: Boolean
     classroom: Classroom
     err: Error
   }

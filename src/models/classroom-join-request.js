@@ -6,6 +6,7 @@ import mongoose, { Schema } from 'mongoose'
  * @desc A mapping of user who wish to be participated to a specific classroom
  * @prop { candidate } [ObjectId] : A user who wish to be participated to a specific classroom
  * @prop { classroom } [ObjectId] : A classroom which the candidate wish to be participated with
+ * @prop { status } [String] : Status of the request. Possible values are "waiting"(default), "accepted", "refused"
  * @prop { createdAt } [Date] : Date when member join the classroom(got accpeted from classroom creator or accepts the invitation)
  * @prop { updatedAt } [Date] : Date when user's permission have changed to a higher/lower level
  */
@@ -19,6 +20,11 @@ const ClassroomJoinRequestSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'classrooms',
     required: true
+  },
+  status: {
+    type: String,
+    required: true,
+    default: 'waiting'
   },
   createdAt: { type: Date, default: Date.now() },
   updatedAt: { type: Date, default: Date.now() }
